@@ -3,7 +3,7 @@
 ## SPDX-License-Identifier: Apache-2.0
 
 ## Clock Signal
-create_clock -add -name sys_clk_pin -period 10.00 -waveform {0 5} [get_ports IO_CLK]
+create_clock -add -name sys_clk_pin -period 5.00 -waveform {0 2.5} [get_ports SYSCLK_P]
 
 ## Clock Domain Crossings
 set clks_10_unbuf [get_clocks -of_objects [get_pin clkgen/pll/CLKOUT0]]

@@ -8,7 +8,8 @@ module top_earlgrey_nexysvideo #(
   parameter BootRomInitFile = "boot_rom_fpga_nexysvideo.32.vmem"
 ) (
   // Clock and Reset
-  input               IO_CLK,
+	input               SYSCLK_N,
+	input               SYSCLK_P,
   input               IO_RST_N,
   // JTAG interface
   inout               IO_DPS0, // IO_JTCK,    IO_SDCK
@@ -57,6 +58,22 @@ module top_earlgrey_nexysvideo #(
 );
 
   import top_earlgrey_pkg::*;
+	
+	//////////////////////
+  // LVDS Clock  			//
+  //////////////////////
+
+	logic IO_CLK;
+	IBUFGDS #(
+		.DIFF_TERM("FALSE"), // Differential Termination
+		.IBUF_LOW_PWR("TRUE"), // Low power="TRUE", Highest performance="FALSE"
+		.IOSTANDARD("DEFAULT") // Specify the input I/O standard
+		) IBUFGDS_inst (
+		.O(IO_CLK), // Clock buffer output
+		.I(SYSCLK_P), // Diff_p clock buffer input (connect directly to top-level port)
+		.IB(SYSCLK_N) // Diff_n clock buffer input (connect directly to top-level port)
+	);
+	
 
   //////////////////////
   // Padring Instance //

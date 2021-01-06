@@ -24,7 +24,7 @@ module clkgen_xil7series # (
   logic clk_48_unbuf;
 
   // input clock buffer
-  IBUFG io_clk_ibufg (
+  BUFG io_clk_ibufg (
     .I (IO_CLK),
     .O (io_clk_buf)
   );
@@ -40,7 +40,7 @@ module clkgen_xil7series # (
     .COMPENSATION         ("ZHOLD"),
     .STARTUP_WAIT         ("FALSE"),
     .DIVCLK_DIVIDE        (1),
-    .CLKFBOUT_MULT        (12),
+    .CLKFBOUT_MULT        (6),
     .CLKFBOUT_PHASE       (0.000),
     .CLKOUT0_DIVIDE       (120),
     .CLKOUT0_PHASE        (0.000),
@@ -48,7 +48,7 @@ module clkgen_xil7series # (
     .CLKOUT1_DIVIDE       (25),
     .CLKOUT1_PHASE        (0.000),
     .CLKOUT1_DUTY_CYCLE   (0.500),
-    .CLKIN1_PERIOD        (10.000)
+    .CLKIN1_PERIOD        (5.000)
   ) pll (
     .CLKFBOUT            (clk_fb_unbuf),
     .CLKOUT0             (clk_10_unbuf),
