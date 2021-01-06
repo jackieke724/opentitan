@@ -166,8 +166,8 @@ set_property -dict { PACKAGE_PIN U22   IOSTANDARD LVCMOS33 } [get_ports { IO_USB
 
 
 ## UART
-set_property -dict { PACKAGE_PIN Y20  	IOSTANDARD LVCMOS33 } [get_ports { IO_UTX }]; #IO_L15P_T2_DQS_RDWR_B_14 Sch=uart_rx_out
-set_property -dict { PACKAGE_PIN Y23  	IOSTANDARD LVCMOS33 } [get_ports { IO_URX }]; #IO_L14P_T2_SRCC_14 Sch=uart_tx_in
+set_property -dict { PACKAGE_PIN Y23  	IOSTANDARD LVCMOS33 } [get_ports { IO_UTX }]; #IO_L15P_T2_DQS_RDWR_B_14 Sch=uart_rx_out
+set_property -dict { PACKAGE_PIN Y20  	IOSTANDARD LVCMOS33 } [get_ports { IO_URX }]; #IO_L14P_T2_SRCC_14 Sch=uart_tx_in
 
 set_input_delay -clock 	clk_io_div4 -max 2 [get_ports { IO_URX }]
 set_input_delay -clock 	clk_io_div4 -min 1 [get_ports { IO_URX }]
