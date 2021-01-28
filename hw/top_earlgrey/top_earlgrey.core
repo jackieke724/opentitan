@@ -19,6 +19,7 @@ filesets:
       - lowrisc:ip:pinmux_component
       - lowrisc:ip:padctrl_component
       - lowrisc:ip:rv_timer
+      - lowrisc:ip:vec_dot
       - lowrisc:ip:tlul
       - lowrisc:ip:spi_device
       - lowrisc:ip:aes

@@ -119,6 +119,7 @@ module top_earlgrey #(
   logic        cio_spi_device_sdi_p2d;
   logic        cio_spi_device_sdo_d2p;
   logic        cio_spi_device_sdo_en_d2p;
+  // vec_dot
   // rv_timer
   // sensor_ctrl
   // otp_ctrl
@@ -164,7 +165,7 @@ module top_earlgrey #(
   // otbn
 
 
-  logic [85:0]  intr_vector;
+  logic [86:0]  intr_vector;
   // Interrupt source list
   logic intr_uart_tx_watermark;
   logic intr_uart_rx_watermark;
@@ -181,6 +182,7 @@ module top_earlgrey #(
   logic intr_spi_device_rxerr;
   logic intr_spi_device_rxoverflow;
   logic intr_spi_device_txunderflow;
+  logic intr_vec_dot_done;
   logic intr_rv_timer_timer_expired_0_0;
   logic intr_otp_ctrl_otp_operation_done;
   logic intr_otp_ctrl_otp_error;
@@ -281,7 +283,7 @@ module top_earlgrey #(
   keymgr_pkg::hw_key_req_t       keymgr_kmac_key;
   keymgr_pkg::kmac_data_req_t       keymgr_kmac_data_req;
   keymgr_pkg::kmac_data_rsp_t       keymgr_kmac_data_rsp;
-  logic [3:0] clkmgr_idle;
+  logic [4:0] clkmgr_idle;
   otp_ctrl_pkg::otp_lc_data_t       otp_ctrl_otp_lc_data;
   otp_ctrl_pkg::lc_otp_program_req_t       lc_ctrl_lc_otp_program_req;
   otp_ctrl_pkg::lc_otp_program_rsp_t       lc_ctrl_lc_otp_program_rsp;
@@ -338,6 +340,8 @@ module top_earlgrey #(
   tlul_pkg::tl_d2h_t       nmi_gen_tl_rsp;
   tlul_pkg::tl_h2d_t       otbn_tl_req;
   tlul_pkg::tl_d2h_t       otbn_tl_rsp;
+  tlul_pkg::tl_h2d_t       vec_dot_tl_req;
+  tlul_pkg::tl_d2h_t       vec_dot_tl_rsp;
   tlul_pkg::tl_h2d_t       keymgr_tl_req;
   tlul_pkg::tl_d2h_t       keymgr_tl_rsp;
   tlul_pkg::tl_h2d_t       uart_tl_req;
@@ -778,6 +782,19 @@ module top_earlgrey #(
       .rst_ni (rstmgr_resets.rst_spi_device_n[rstmgr_pkg::Domain0Sel])
   );
 
+  vec_dot u_vec_dot (
+
+      // Interrupt
+      .intr_done_o (intr_vec_dot_done),
+
+      // Inter-module signals
+      .idle_o(clkmgr_idle[0]),
+      .tl_i(vec_dot_tl_req),
+      .tl_o(vec_dot_tl_rsp),
+      .clk_i (clkmgr_clocks.clk_main_vec_dot),
+      .rst_ni (rstmgr_resets.rst_sys_n[rstmgr_pkg::Domain0Sel])
+  );
+
   rv_timer u_rv_timer (
 
       // Interrupt
@@ -1160,7 +1177,7 @@ module top_earlgrey #(
       .alert_rx_i  ( alert_rx[12:11] ),
 
       // Inter-module signals
-      .idle_o(clkmgr_idle[0]),
+      .idle_o(clkmgr_idle[1]),
       .tl_i(aes_tl_req),
       .tl_o(aes_tl_rsp),
       .clk_i (clkmgr_clocks.clk_main_aes),
@@ -1175,7 +1192,7 @@ module top_earlgrey #(
       .intr_hmac_err_o   (intr_hmac_hmac_err),
 
       // Inter-module signals
-      .idle_o(clkmgr_idle[1]),
+      .idle_o(clkmgr_idle[2]),
       .tl_i(hmac_tl_req),
       .tl_o(hmac_tl_rsp),
       .clk_i (clkmgr_clocks.clk_main_hmac),
@@ -1198,7 +1215,7 @@ module top_earlgrey #(
       .keymgr_kdf_o(keymgr_kmac_data_rsp),
       .entropy_o(),
       .entropy_i(edn_pkg::EDN_RSP_DEFAULT),
-      .idle_o(clkmgr_idle[2]),
+      .idle_o(clkmgr_idle[3]),
       .tl_i(kmac_tl_req),
       .tl_o(kmac_tl_rsp),
       .clk_i (clkmgr_clocks.clk_main_kmac),
@@ -1388,7 +1405,7 @@ module top_earlgrey #(
       .alert_rx_i  ( alert_rx[17:16] ),
 
       // Inter-module signals
-      .idle_o(clkmgr_idle[3]),
+      .idle_o(clkmgr_idle[4]),
       .tl_i(otbn_tl_req),
       .tl_o(otbn_tl_rsp),
       .clk_i (clkmgr_clocks.clk_main_otbn),
@@ -1397,6 +1414,7 @@ module top_earlgrey #(
 
   // interrupt assignments
   assign intr_vector = {
+      intr_vec_dot_done,
       intr_kmac_kmac_err,
       intr_kmac_fifo_empty,
       intr_kmac_kmac_done,
@@ -1548,6 +1566,10 @@ module top_earlgrey #(
     // port: tl_otbn
     .tl_otbn_o(otbn_tl_req),
     .tl_otbn_i(otbn_tl_rsp),
+
+    // port: tl_vec_dot
+    .tl_vec_dot_o(vec_dot_tl_req),
+    .tl_vec_dot_i(vec_dot_tl_rsp),
 
     // port: tl_keymgr
     .tl_keymgr_o(keymgr_tl_req),

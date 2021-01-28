@@ -102,6 +102,7 @@
         unique: yes
         clocks:
         {
+          clk_main_vec_dot: main
           clk_main_aes: main
           clk_main_hmac: main
           clk_main_kmac: main
@@ -722,6 +723,80 @@
           width: 1
           default: ""
           top_signame: spi_device_tl
+          index: -1
+        }
+      ]
+    }
+    {
+      name: vec_dot
+      type: vec_dot
+      clock_srcs:
+      {
+        clk_i: main
+      }
+      clock_group: trans
+      reset_connections:
+      {
+        rst_ni: rstmgr_resets.rst_sys_n[rstmgr_pkg::Domain0Sel]
+      }
+      base_addr: 0x40060000
+      clock_reset_export: []
+      clock_connections:
+      {
+        clk_i: clkmgr_clocks.clk_main_vec_dot
+      }
+      domain: "0"
+      size: 0x1000
+      bus_device: tlul
+      bus_host: none
+      available_input_list: []
+      available_output_list: []
+      available_inout_list: []
+      param_list: []
+      interrupt_list:
+      [
+        {
+          name: done
+          width: 1
+          bits: "0"
+          bitinfo:
+          [
+            1
+            1
+            0
+          ]
+          type: interrupt
+        }
+      ]
+      alert_list: []
+      wakeup_list: []
+      reset_request_list: []
+      scan: "false"
+      scan_reset: "false"
+      inter_signal_list:
+      [
+        {
+          name: idle
+          type: uni
+          struct: logic
+          width: 1
+          act: req
+          inst_name: vec_dot
+          default: ""
+          package: ""
+          top_signame: clkmgr_idle
+          index: 0
+        }
+        {
+          struct: tl
+          package: tlul_pkg
+          type: req_rsp
+          act: rsp
+          name: tl
+          inst_name: vec_dot
+          width: 1
+          default: ""
+          top_signame: vec_dot_tl
           index: -1
         }
       ]
@@ -2198,7 +2273,7 @@
           name: idle
           act: rcv
           package: ""
-          width: 4
+          width: 5
           inst_name: clkmgr
           default: ""
           top_type: one-to-N
@@ -3287,7 +3362,7 @@
           inst_name: aes
           default: ""
           top_signame: clkmgr_idle
-          index: 0
+          index: 1
         }
         {
           struct: tl
@@ -3385,7 +3460,7 @@
           inst_name: hmac
           default: ""
           top_signame: clkmgr_idle
-          index: 1
+          index: 2
         }
         {
           struct: tl
@@ -3554,7 +3629,7 @@
           inst_name: kmac
           default: ""
           top_signame: clkmgr_idle
-          index: 2
+          index: 3
         }
         {
           struct: tl
@@ -4780,7 +4855,7 @@
           default: ""
           package: ""
           top_signame: clkmgr_idle
-          index: 3
+          index: 4
         }
         {
           struct: tl
@@ -5113,6 +5188,7 @@
       ]
       clkmgr.idle:
       [
+        vec_dot.idle
         aes.idle
         hmac.idle
         kmac.idle
@@ -5253,6 +5329,10 @@
       otbn.tl:
       [
         main.tl_otbn
+      ]
+      vec_dot.tl:
+      [
+        main.tl_vec_dot
       ]
       keymgr.tl:
       [
@@ -5395,6 +5475,7 @@
           otbn
           keymgr
           kmac
+          vec_dot
         ]
         dm_sba:
         [
@@ -5416,6 +5497,7 @@
           nmi_gen
           otbn
           kmac
+          vec_dot
         ]
       }
       nodes:
@@ -5542,7 +5624,11 @@
             }
             {
               base_addr: 0x40000000
-              size_byte: 0x421000
+              size_byte: 0x51000
+            }
+            {
+              base_addr: 0x40100000
+              size_byte: 0x321000
             }
             {
               base_addr: 0x40500000
@@ -5794,6 +5880,24 @@
             {
               base_addr: 0x411d0000
               size_byte: 0x10000
+            }
+          ]
+          xbar: false
+          stub: false
+          pipeline: "true"
+        }
+        {
+          name: vec_dot
+          type: device
+          clock: clk_main_i
+          reset: rst_main_ni
+          pipeline_byp: "false"
+          inst_type: vec_dot
+          addr_range:
+          [
+            {
+              base_addr: 0x40060000
+              size_byte: 0x1000
             }
           ]
           xbar: false
@@ -6085,6 +6189,18 @@
           width: 1
           default: ""
           top_signame: otbn_tl
+          index: -1
+        }
+        {
+          struct: tl
+          type: req_rsp
+          name: tl_vec_dot
+          act: req
+          package: tlul_pkg
+          inst_name: main
+          width: 1
+          default: ""
+          top_signame: vec_dot_tl
           index: -1
         }
         {
@@ -6575,6 +6691,7 @@
     otbn
     keymgr
     kmac
+    vec_dot
   ]
   interrupt:
   [
@@ -7280,6 +7397,19 @@
       type: interrupt
       module_name: kmac
     }
+    {
+      name: vec_dot_done
+      width: 1
+      bits: "0"
+      bitinfo:
+      [
+        1
+        1
+        0
+      ]
+      type: interrupt
+      module_name: vec_dot
+    }
   ]
   alert_module:
   [
@@ -7930,6 +8060,30 @@
         width: 1
         default: ""
         top_signame: spi_device_tl
+        index: -1
+      }
+      {
+        name: idle
+        type: uni
+        struct: logic
+        width: 1
+        act: req
+        inst_name: vec_dot
+        default: ""
+        package: ""
+        top_signame: clkmgr_idle
+        index: 0
+      }
+      {
+        struct: tl
+        package: tlul_pkg
+        type: req_rsp
+        act: rsp
+        name: tl
+        inst_name: vec_dot
+        width: 1
+        default: ""
+        top_signame: vec_dot_tl
         index: -1
       }
       {
@@ -8819,7 +8973,7 @@
         name: idle
         act: rcv
         package: ""
-        width: 4
+        width: 5
         inst_name: clkmgr
         default: ""
         top_type: one-to-N
@@ -9134,7 +9288,7 @@
         inst_name: aes
         default: ""
         top_signame: clkmgr_idle
-        index: 0
+        index: 1
       }
       {
         struct: tl
@@ -9158,7 +9312,7 @@
         inst_name: hmac
         default: ""
         top_signame: clkmgr_idle
-        index: 1
+        index: 2
       }
       {
         struct: tl
@@ -9216,7 +9370,7 @@
         inst_name: kmac
         default: ""
         top_signame: clkmgr_idle
-        index: 2
+        index: 3
       }
       {
         struct: tl
@@ -9614,7 +9768,7 @@
         default: ""
         package: ""
         top_signame: clkmgr_idle
-        index: 3
+        index: 4
       }
       {
         struct: tl
@@ -10014,6 +10168,18 @@
         width: 1
         default: ""
         top_signame: otbn_tl
+        index: -1
+      }
+      {
+        struct: tl
+        type: req_rsp
+        name: tl_vec_dot
+        act: req
+        package: tlul_pkg
+        inst_name: main
+        width: 1
+        default: ""
+        top_signame: vec_dot_tl
         index: -1
       }
       {
@@ -10621,7 +10787,7 @@
         package: ""
         struct: logic
         signame: clkmgr_idle
-        width: 4
+        width: 5
         type: uni
         default: ""
       }
@@ -11069,6 +11235,22 @@
         package: tlul_pkg
         struct: tl_d2h
         signame: otbn_tl_rsp
+        width: 1
+        type: req_rsp
+        default: ""
+      }
+      {
+        package: tlul_pkg
+        struct: tl_h2d
+        signame: vec_dot_tl_req
+        width: 1
+        type: req_rsp
+        default: ""
+      }
+      {
+        package: tlul_pkg
+        struct: tl_d2h
+        signame: vec_dot_tl_rsp
         width: 1
         type: req_rsp
         default: ""

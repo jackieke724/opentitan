@@ -42,6 +42,16 @@ package top_earlgrey_pkg;
   parameter int unsigned TOP_EARLGREY_SPI_DEVICE_SIZE_BYTES = 32'h1000;
 
   /**
+   * Peripheral base address for vec_dot in top earlgrey.
+   */
+  parameter int unsigned TOP_EARLGREY_VEC_DOT_BASE_ADDR = 32'h40060000;
+
+  /**
+   * Peripheral size in bytes for vec_dot in top earlgrey.
+   */
+  parameter int unsigned TOP_EARLGREY_VEC_DOT_SIZE_BYTES = 32'h1000;
+
+  /**
    * Peripheral base address for rv_timer in top earlgrey.
    */
   parameter int unsigned TOP_EARLGREY_RV_TIMER_BASE_ADDR = 32'h40100000;

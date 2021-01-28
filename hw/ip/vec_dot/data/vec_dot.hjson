@@ -1,0 +1,119 @@
+// Copyright lowRISC contributors.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+{ name: "vec_dot"
+  clock_primary: "clk_i"
+  bus_device: "tlul"
+  bus_host: "none"
+  param_list: [
+    { name: "VEC_LEN",
+      desc: "Vector Length",
+      type: "int",
+      default: "4"
+    }
+  ]
+  interrupt_list: [
+    { name: "done"
+      desc: "Vector Dot Product has completed the operation"
+    }
+  ]
+
+  inter_signal_list: [
+    // TODO: CSRNG isn't committed yet, depends on assumed interface done for
+    // AES in https://github.com/lowRISC/opentitan/pull/2140.
+    /*{ name:    "entropy",
+      type:    "req_rsp",
+      act:     "req",
+      package: "csrng_pkg",
+      struct:  "csrng_entropy",
+      width:   "1"
+    },*/
+
+    // Vector Dot Product is not performing any operation and can be clock/power-gated.
+    { name:    "idle",
+      type:    "uni",
+      struct:  "logic",
+      width:   "1",
+      act:     "req",
+    }
+  ]
+
+  regwidth: "32"
+  registers: [
+    { name: "CMD"
+      desc: "Vector Dot Product command register",
+      swaccess: "r0w1c",
+      hwaccess: "hro",
+      hwext: "true",
+      hwqe:  "true",
+      fields: [
+        { bits: "0"
+          name: "start"
+          desc: '''
+            Start the operation
+
+            The completion is signalled by the done interrupt.
+          '''
+          tags: [
+            // Don't write this field in the automated CSR tests. Doing so will
+            // start Vector Dot Product, but we won't have initialised its memory with any
+            // code, so we'll get Xs on its interfaces and everything will be
+            // a bit of a mess!
+            "excl:CsrAllTests:CsrExclWrite"
+          ]
+        }
+        { bits: "1",
+          name: "dummy",
+          desc: '''
+            Reggen doesn't generate sub-fields with only a single field
+            specified; instead, the whole register is taken as a field, leading
+            to signals like `hw2reg.status.d` instead of
+            `hw2reg.status.start.d`. Since we expect to add more commands later,
+            we force the generation of fields with this dummy field for now.
+          '''
+        }
+      ]
+    }
+    { name: "STATUS",
+      desc: "Status",
+      swaccess: "ro",
+      hwaccess: "hwo",
+      hwext: "true",
+      fields: [
+        { bits: "0",
+          name: "busy",
+          desc: "Vector Dot Product is performing an operation."
+        }
+        { bits: "1",
+          name: "dummy",
+          desc: '''
+            See !!CMD.dummy for details.
+          '''
+        }
+      ]
+    } // register : status
+    { name: "DOTP_RESULT",
+      desc: "Vector Dot Product read data",
+      swaccess: "ro",
+      hwaccess: "hwo",
+      hwext: "true",
+      fields: [
+        { bits: "31:0" }
+      ]
+      tags: [// read wdata when fifo is empty, dut may return unknown data
+             "excl:CsrAllTests:CsrExclCheck"]
+    }
+    { name: "WDATA",
+      desc: "Vector Dot Product write data",
+      swaccess: "wo",
+      hwaccess: "hro",
+      hwqe: "true",
+      fields: [
+        { bits: "31:0" }
+      ]
+      tags: [// don't write to wdata - it affects several other csrs
+             "excl:CsrNonInitTests:CsrExclWrite"]
+    }
+    
+  ]
+}

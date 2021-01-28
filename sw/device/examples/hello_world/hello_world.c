@@ -7,6 +7,7 @@
 #include "sw/device/lib/dif/dif_gpio.h"
 #include "sw/device/lib/dif/dif_spi_device.h"
 #include "sw/device/lib/dif/dif_uart.h"
+#include "sw/device/lib/dif/dif_vec_dot.h"
 #include "sw/device/lib/pinmux.h"
 #include "sw/device/lib/runtime/hart.h"
 #include "sw/device/lib/runtime/log.h"
@@ -19,6 +20,7 @@
 static dif_gpio_t gpio;
 static dif_spi_device_t spi;
 static dif_uart_t uart;
+static dif_vec_dot_t vec_dot;
 
 int main(int argc, char **argv) {
   CHECK(dif_uart_init(
@@ -75,6 +77,25 @@ int main(int argc, char **argv) {
 
   CHECK(dif_spi_device_send(&spi, "SPI!", 4, /*bytes_sent=*/NULL) ==
         kDifSpiDeviceOk);
+  
+  
+  CHECK(dif_vec_dot_init(
+			      (dif_vec_dot_params_t){
+                .base_addr =
+                    mmio_region_from_addr(TOP_EARLGREY_VEC_DOT_BASE_ADDR),
+            },
+            &vec_dot) == kDifVecDotOk);
+  CHECK(dif_vec_dot_send_vectors(&vec_dot, 1) == kDifVecDotOk);
+  CHECK(dif_vec_dot_start(&vec_dot) == kDifVecDotOk);
+  LOG_INFO("Vector inner product has started.");
+  bool busy = true;
+  while(busy){
+    CHECK(dif_vec_dot_is_busy(&vec_dot, &busy) == kDifVecDotOk);
+  }
+  uint32_t result;
+  CHECK(dif_vec_dot_read(&vec_dot, &result) == kDifVecDotOk);
+  LOG_INFO("Vector inner product is %d.", result);
+
 
   uint32_t gpio_state = 0;
   while (true) {

@@ -16,6 +16,20 @@ sw_lib_dif_clkmgr = declare_dependency(
   )
 )
 
+# Vector Dot Product DIF library (dif_vec_dot)
+sw_lib_dif_vec_dot = declare_dependency(
+  link_with: static_library(
+    'dif_vec_dot_ot',
+    sources: [
+      hw_ip_vec_dot_reg_h,
+      'dif_vec_dot.c',
+    ],
+    dependencies: [
+      sw_lib_mmio,
+    ],
+  )
+)
+
 # UART DIF library (dif_uart)
 sw_lib_dif_uart = declare_dependency(
   link_with: static_library(
