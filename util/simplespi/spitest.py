@@ -71,6 +71,13 @@ def main():
         metavar='input',
         default='1234',
         help='message to send in 4 byte chunks')
+    parser.add_argument(
+        '-i',
+        '--input',
+        nargs=1,
+        metavar='/path/file.txt',
+        action='store',
+        help='Specify input with a file')
     args = parser.parse_args()
 
     if args.version:
@@ -117,6 +124,19 @@ def main():
             gpio.write(0x70)
             time.sleep(2)
         return
+    
+    print("Select SPI")
+    gpio.write(0x30)
+    if args.input:
+        print("Opening "+args.input[0])
+        with open(args.input[0], 'r') as fp:
+            for s in fp:
+   	            while len(s):
+   	                write_buf = bytes(s[:4], encoding='utf8')
+   	                read_buf = device.exchange(write_buf, duplex=True)
+   	                print("Got " + str(read_buf))
+   	                s = s[4:]
+        return
 
     print("Select SPI")
     gpio.write(0x30)
@@ -137,7 +157,7 @@ def main():
 
     while len(s):
         write_buf = bytes(s[:4], encoding='utf8')
-        read_buf = device.exchange(write_buf, duplex=True).tobytes()
+        read_buf = device.exchange(write_buf, duplex=True)
         print("Got " + str(read_buf))
         s = s[4:]
 
