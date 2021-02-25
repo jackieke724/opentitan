@@ -62,7 +62,7 @@
             "excl:CsrAllTests:CsrExclWrite"
           ]
         }
-        { bits: "1",
+        { bits: "2",
           name: "dummy",
           desc: '''
             Reggen doesn't generate sub-fields with only a single field
@@ -70,6 +70,20 @@
             to signals like `hw2reg.status.d` instead of
             `hw2reg.status.start.d`. Since we expect to add more commands later,
             we force the generation of fields with this dummy field for now.
+          '''
+        }
+      ]
+    }
+    { name: "MODE"
+      desc: "Vector Dot Product mode register",
+      swaccess: "wo",
+      hwaccess: "hro",
+      fields: [
+        { bits: "0",
+          name: "mode",
+          desc: '''
+            If mode is 0, send input via register
+            If mode is 1, send input via buffer ram (window)
           '''
         }
       ]
@@ -113,6 +127,24 @@
       ]
       tags: [// don't write to wdata - it affects several other csrs
              "excl:CsrNonInitTests:CsrExclWrite"]
+    }
+    
+    { skipto: "0x8000" }
+
+    // Dmem size (given as `items` below) must be a power of two.
+    { window: {
+        name: "DMEM"
+        items: "1024" // 4 kB
+        swaccess: "rw",
+        byte-write: "false",
+        desc: '''
+          Data Memory.
+
+          This register should only be accesed while vec_dot is not busy, as indicated by the !!STATUS.busy flag.
+          Accesses while vec_dot is busy are blocking.
+
+        '''
+      }
     }
     
   ]

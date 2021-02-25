@@ -37,6 +37,10 @@ package vec_dot_reg_pkg;
   } vec_dot_reg2hw_cmd_reg_t;
 
   typedef struct packed {
+    logic        q;
+  } vec_dot_reg2hw_mode_reg_t;
+
+  typedef struct packed {
     logic [31:0] q;
     logic        qe;
   } vec_dot_reg2hw_wdata_reg_t;
@@ -65,10 +69,11 @@ package vec_dot_reg_pkg;
   // Register to internal design logic //
   ///////////////////////////////////////
   typedef struct packed {
-    vec_dot_reg2hw_intr_state_reg_t intr_state; // [40:40]
-    vec_dot_reg2hw_intr_enable_reg_t intr_enable; // [39:39]
-    vec_dot_reg2hw_intr_test_reg_t intr_test; // [38:37]
-    vec_dot_reg2hw_cmd_reg_t cmd; // [36:33]
+    vec_dot_reg2hw_intr_state_reg_t intr_state; // [41:41]
+    vec_dot_reg2hw_intr_enable_reg_t intr_enable; // [40:40]
+    vec_dot_reg2hw_intr_test_reg_t intr_test; // [39:38]
+    vec_dot_reg2hw_cmd_reg_t cmd; // [37:34]
+    vec_dot_reg2hw_mode_reg_t mode; // [33:33]
     vec_dot_reg2hw_wdata_reg_t wdata; // [32:0]
   } vec_dot_reg2hw_t;
 
@@ -82,14 +87,18 @@ package vec_dot_reg_pkg;
   } vec_dot_hw2reg_t;
 
   // Register Address
-  parameter logic [4:0] VEC_DOT_INTR_STATE_OFFSET = 5'h 0;
-  parameter logic [4:0] VEC_DOT_INTR_ENABLE_OFFSET = 5'h 4;
-  parameter logic [4:0] VEC_DOT_INTR_TEST_OFFSET = 5'h 8;
-  parameter logic [4:0] VEC_DOT_CMD_OFFSET = 5'h c;
-  parameter logic [4:0] VEC_DOT_STATUS_OFFSET = 5'h 10;
-  parameter logic [4:0] VEC_DOT_DOTP_RESULT_OFFSET = 5'h 14;
-  parameter logic [4:0] VEC_DOT_WDATA_OFFSET = 5'h 18;
+  parameter logic [15:0] VEC_DOT_INTR_STATE_OFFSET = 16'h 0;
+  parameter logic [15:0] VEC_DOT_INTR_ENABLE_OFFSET = 16'h 4;
+  parameter logic [15:0] VEC_DOT_INTR_TEST_OFFSET = 16'h 8;
+  parameter logic [15:0] VEC_DOT_CMD_OFFSET = 16'h c;
+  parameter logic [15:0] VEC_DOT_MODE_OFFSET = 16'h 10;
+  parameter logic [15:0] VEC_DOT_STATUS_OFFSET = 16'h 14;
+  parameter logic [15:0] VEC_DOT_DOTP_RESULT_OFFSET = 16'h 18;
+  parameter logic [15:0] VEC_DOT_WDATA_OFFSET = 16'h 1c;
 
+  // Window parameter
+  parameter logic [15:0] VEC_DOT_DMEM_OFFSET = 16'h 8000;
+  parameter logic [15:0] VEC_DOT_DMEM_SIZE   = 16'h 1000;
 
   // Register Index
   typedef enum int {
@@ -97,20 +106,22 @@ package vec_dot_reg_pkg;
     VEC_DOT_INTR_ENABLE,
     VEC_DOT_INTR_TEST,
     VEC_DOT_CMD,
+    VEC_DOT_MODE,
     VEC_DOT_STATUS,
     VEC_DOT_DOTP_RESULT,
     VEC_DOT_WDATA
   } vec_dot_id_e;
 
   // Register width information to check illegal writes
-  parameter logic [3:0] VEC_DOT_PERMIT [7] = '{
+  parameter logic [3:0] VEC_DOT_PERMIT [8] = '{
     4'b 0001, // index[0] VEC_DOT_INTR_STATE
     4'b 0001, // index[1] VEC_DOT_INTR_ENABLE
     4'b 0001, // index[2] VEC_DOT_INTR_TEST
     4'b 0001, // index[3] VEC_DOT_CMD
-    4'b 0001, // index[4] VEC_DOT_STATUS
-    4'b 1111, // index[5] VEC_DOT_DOTP_RESULT
-    4'b 1111  // index[6] VEC_DOT_WDATA
+    4'b 0001, // index[4] VEC_DOT_MODE
+    4'b 0001, // index[5] VEC_DOT_STATUS
+    4'b 1111, // index[6] VEC_DOT_DOTP_RESULT
+    4'b 1111  // index[7] VEC_DOT_WDATA
   };
 endpackage
 

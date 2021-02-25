@@ -36,6 +36,21 @@ dif_vec_dot_result_t dif_vec_dot_reset(const dif_vec_dot_t *vec_dot) {
 }
 
 
+dif_vec_dot_result_t dif_vec_dot_mode(const dif_vec_dot_t *vec_dot, uint32_t mode) {
+  if (vec_dot == NULL ) {
+    return kDifVecDotBadArg;
+  }
+  
+  uint32_t mode_reg_val = 0x0u;
+  bool mode_bit;
+  mode_bit = (mode==0) ?false :true;
+  mode_reg_val = bitfield_bit32_write(mode_reg_val, VEC_DOT_MODE_MODE_BIT, mode_bit);
+  mmio_region_write32(vec_dot->params.base_addr, VEC_DOT_MODE_REG_OFFSET, mode_reg_val);
+
+  return kDifVecDotOk;
+}
+
+
 dif_vec_dot_result_t dif_vec_dot_start(const dif_vec_dot_t *vec_dot) {
   if (vec_dot == NULL ) {
     return kDifVecDotBadArg;
@@ -49,11 +64,46 @@ dif_vec_dot_result_t dif_vec_dot_start(const dif_vec_dot_t *vec_dot) {
 }
 
 
-dif_vec_dot_result_t dif_vec_dot_send_vectors(const dif_vec_dot_t *vec_dot,
+dif_vec_dot_result_t dif_vec_dot_send_vectors_reg(const dif_vec_dot_t *vec_dot,
                                                                 uint32_t transaction){
   for (uint32_t i=0; i<8; i++) {
     mmio_region_write32(vec_dot->params.base_addr, VEC_DOT_WDATA_REG_OFFSET, transaction+i);
   }
+  return kDifVecDotOk;
+}
+
+
+dif_vec_dot_result_t dif_vec_dot_send_vectors_ram(const dif_vec_dot_t *vec_dot,
+                                                                uint32_t transaction){
+  if (vec_dot == NULL ) {
+    return kDifVecDotBadArg;
+  }
+
+  uint32_t src[8];
+  for (uint32_t i=0; i<8; i++) {
+    src[i] = transaction+i;
+  }
+  mmio_region_memcpy_to_mmio32(vec_dot->params.base_addr, 
+                                  VEC_DOT_DMEM_REG_OFFSET,
+                                  (void*)src, 
+                                  4*8);
+  return kDifVecDotOk;
+}
+
+
+dif_vec_dot_result_t dif_vec_dot_dmem_read(const dif_vec_dot_t *vec_dot,
+                                            uint32_t offset_bytes, void *dest,
+                                            size_t len_bytes) {
+  // Only 32b-aligned 32b word accesses are allowed.
+  if (vec_dot == NULL || dest == NULL || len_bytes % 4 != 0 ||
+      offset_bytes % 4 != 0 ||
+      offset_bytes + len_bytes > VEC_DOT_DMEM_SIZE_BYTES) {
+    return kDifVecDotBadArg;
+  }
+
+  mmio_region_memcpy_from_mmio32(
+      vec_dot->params.base_addr, VEC_DOT_DMEM_REG_OFFSET + offset_bytes, dest, len_bytes);
+
   return kDifVecDotOk;
 }
 

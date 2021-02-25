@@ -49,7 +49,7 @@ package top_earlgrey_pkg;
   /**
    * Peripheral size in bytes for vec_dot in top earlgrey.
    */
-  parameter int unsigned TOP_EARLGREY_VEC_DOT_SIZE_BYTES = 32'h1000;
+  parameter int unsigned TOP_EARLGREY_VEC_DOT_SIZE_BYTES = 32'h10000;
 
   /**
    * Peripheral base address for rv_timer in top earlgrey.

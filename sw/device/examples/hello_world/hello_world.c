@@ -85,16 +85,27 @@ int main(int argc, char **argv) {
                     mmio_region_from_addr(TOP_EARLGREY_VEC_DOT_BASE_ADDR),
             },
             &vec_dot) == kDifVecDotOk);
-  CHECK(dif_vec_dot_send_vectors(&vec_dot, 1) == kDifVecDotOk);
+  CHECK(dif_vec_dot_mode(&vec_dot, 0) == kDifVecDotOk);
+  CHECK(dif_vec_dot_send_vectors_reg(&vec_dot, 0) == kDifVecDotOk);
+  CHECK(dif_vec_dot_send_vectors_ram(&vec_dot, 2) == kDifVecDotOk);
   CHECK(dif_vec_dot_start(&vec_dot) == kDifVecDotOk);
   LOG_INFO("Vector inner product has started.");
   bool busy = true;
   while(busy){
+    LOG_INFO("Vector inner product is busy.");
     CHECK(dif_vec_dot_is_busy(&vec_dot, &busy) == kDifVecDotOk);
   }
   uint32_t result;
   CHECK(dif_vec_dot_read(&vec_dot, &result) == kDifVecDotOk);
   LOG_INFO("Vector inner product is %d.", result);
+  
+  uint32_t dest[1024];
+  uint32_t sum=0;
+  CHECK(dif_vec_dot_dmem_read(&vec_dot, 0, dest, 1024*4) == kDifVecDotOk);
+  for (uint32_t i=0; i<1024; i++) {
+    sum += dest[i];
+  }
+  LOG_INFO("Destination array sum is %d.", sum);
 
 
   uint32_t gpio_state = 0;

@@ -175,7 +175,24 @@ dif_vec_dot_result_t dif_vec_dot_configure(const dif_vec_dot_t *vec_dot,
 
 
 /**
- * Send Vector Dot Product vectors.
+ * Send Vector Dot Product vectors through the registers.
+ *
+ * send vector data in serial with the values also in serial
+ * starting at transaction.
+ * i.e. transaction = 0, 
+ * vector1 = [0,1,2,3] vector2 = [4,5,6,7]
+ *
+ * @param vec_dot A Vector Dot Product handle.
+ * @param transaction Starting value of the vector values.
+ * @return The result of the operation.
+ */
+DIF_WARN_UNUSED_RESULT
+dif_vec_dot_result_t dif_vec_dot_send_vectors_reg(const dif_vec_dot_t *vec_dot,
+                                                            uint32_t transaction);
+
+
+/**
+ * Send Vector Dot Product vectors through the buffer ram.
  *
  * send vector data in serial
  *
@@ -184,15 +201,39 @@ dif_vec_dot_result_t dif_vec_dot_configure(const dif_vec_dot_t *vec_dot,
  * @return The result of the operation.
  */
 DIF_WARN_UNUSED_RESULT
-dif_vec_dot_result_t dif_vec_dot_send_vectors(const dif_vec_dot_t *vec_dot,
+dif_vec_dot_result_t dif_vec_dot_send_vectors_ram(const dif_vec_dot_t *vec_dot,
                                                             uint32_t transaction);
 
 
 /**
- * Begins a Vector Dot Product transaction.
+ * Read from Vector Dot Product buffer ram.
+ *
+ * @param vec_dot A Vector Dot Product handle.
+ * @param transaction Transaction configuration parameters.
+ * @return The result of the operation.
+ */
+DIF_WARN_UNUSED_RESULT
+dif_vec_dot_result_t dif_vec_dot_dmem_read(const dif_vec_dot_t *vec_dot,
+                                            uint32_t offset_bytes, void *dest,
+                                            size_t len_bytes);
+
+
+/**
+ * Selects a Vector Dot Product operation mode.
  *
  * Each call to this function should be sequenced with a call to
  * `dif_vec_dot_end()`.
+ *
+ * @param vec_dot A Vector Dot Product handle.
+ * @param transaction Transaction configuration parameters.
+ * @return The result of the operation.
+ */
+DIF_WARN_UNUSED_RESULT
+dif_vec_dot_result_t dif_vec_dot_mode(const dif_vec_dot_t *vec_dot, uint32_t mode);
+
+
+/**
+ * Begins a Vector Dot Product transaction.
  *
  * @param vec_dot A Vector Dot Product handle.
  * @param transaction Transaction configuration parameters.

@@ -95,7 +95,7 @@ extern "C" {
  * address between #TOP_EARLGREY_VEC_DOT_BASE_ADDR and
  * `TOP_EARLGREY_VEC_DOT_BASE_ADDR + TOP_EARLGREY_VEC_DOT_SIZE_BYTES`.
  */
-#define TOP_EARLGREY_VEC_DOT_SIZE_BYTES 0x1000u
+#define TOP_EARLGREY_VEC_DOT_SIZE_BYTES 0x10000u
 
 /**
  * Peripheral base address for rv_timer in top earlgrey.
