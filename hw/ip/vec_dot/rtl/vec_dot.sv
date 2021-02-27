@@ -25,7 +25,7 @@ module vec_dot (
   localparam int VEC_LEN  = 4;
   localparam int WLEN    = 64;
 
-  localparam int DmemSizeByte = otbn_reg_pkg::OTBN_DMEM_SIZE;
+  localparam int DmemSizeByte = vec_dot_reg_pkg::VEC_DOT_DMEM_SIZE;
   localparam int DmemAddrWidth = vbits(DmemSizeByte);
 
   logic start, done;
