@@ -16,7 +16,8 @@ package clkmgr_pkg;
     Aes = 0,
     Hmac = 1,
     Kmac = 2,
-    Otbn = 3
+    Otbn = 3,
+    Dla = 4
   } hint_names_e;
 
   typedef struct packed {
@@ -31,6 +32,7 @@ package clkmgr_pkg;
   logic clk_main_hmac;
   logic clk_main_kmac;
   logic clk_main_otbn;
+  logic clk_main_dla;
   logic clk_main_infra;
   logic clk_io_div4_infra;
   logic clk_io_div4_secure;
@@ -49,11 +51,11 @@ package clkmgr_pkg;
   } clkmgr_ast_out_t;
 
   typedef struct packed {
-    logic [4-1:0] idle;
+    logic [5-1:0] idle;
   } clk_hint_status_t;
 
   parameter clk_hint_status_t CLK_HINT_STATUS_DEFAULT = '{
-    idle: {4{1'b1}}
+    idle: {5{1'b1}}
   };
 
 

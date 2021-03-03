@@ -47,7 +47,7 @@ module clkmgr import clkmgr_pkg::*; (
   input scanmode_i,
 
   // idle hints
-  input [3:0] idle_i,
+  input [4:0] idle_i,
 
   // clock output interface
   output clkmgr_ast_out_t clocks_ast_o,
@@ -320,6 +320,8 @@ module clkmgr import clkmgr_pkg::*; (
   logic clk_main_kmac_en;
   logic clk_main_otbn_hint;
   logic clk_main_otbn_en;
+  logic clk_main_dla_hint;
+  logic clk_main_dla_en;
 
   assign clk_main_aes_en = clk_main_aes_hint | ~idle_i[Aes];
 
@@ -401,6 +403,26 @@ module clkmgr import clkmgr_pkg::*; (
     .clk_o(clocks_o.clk_main_otbn)
   );
 
+  assign clk_main_dla_en = clk_main_dla_hint | ~idle_i[Dla];
+
+  prim_flop_2sync #(
+    .Width(1)
+  ) u_clk_main_dla_hint_sync (
+    .clk_i(clk_main_i),
+    .rst_ni(rst_main_ni),
+    .d_i(reg2hw.clk_hints.clk_main_dla_hint.q),
+    .q_o(clk_main_dla_hint)
+  );
+
+  prim_clock_gating #(
+    .NoFpgaGate(1'b1)
+  ) u_clk_main_dla_cg (
+    .clk_i(clk_main_root),
+    .en_i(clk_main_dla_en & clk_main_en),
+    .test_en_i(scanmode_i),
+    .clk_o(clocks_o.clk_main_dla)
+  );
+
 
   // state readback
   assign hw2reg.clk_hints_status.clk_main_aes_val.de = 1'b1;
@@ -411,6 +433,8 @@ module clkmgr import clkmgr_pkg::*; (
   assign hw2reg.clk_hints_status.clk_main_kmac_val.d = clk_main_kmac_en;
   assign hw2reg.clk_hints_status.clk_main_otbn_val.de = 1'b1;
   assign hw2reg.clk_hints_status.clk_main_otbn_val.d = clk_main_otbn_en;
+  assign hw2reg.clk_hints_status.clk_main_dla_val.de = 1'b1;
+  assign hw2reg.clk_hints_status.clk_main_dla_val.d = clk_main_dla_en;
 
   ////////////////////////////////////////////////////
   // Exported clocks

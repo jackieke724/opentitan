@@ -1,0 +1,114 @@
+CAPI=2:
+# Copyright lowRISC contributors.
+# Licensed under the Apache License, Version 2.0, see LICENSE for details.
+# SPDX-License-Identifier: Apache-2.0
+name: "lowrisc:ip:dla:0.1"
+description: "A deep learning accelerator"
+filesets:
+  files_rtl:
+    depend:
+      - lowrisc:prim:all
+      - lowrisc:ip:tlul
+    files:
+      - rtl/INC_global.v: {is_include_file: true}
+      - rtl/async_fifo.v
+      - rtl/dla_reg_pkg.sv
+      - rtl/dla_reg_top.sv
+      - rtl/dla_core.v
+      - rtl/dla_comp.v
+      - rtl/dla_content_add.v
+      - rtl/dla_content_mul.v
+      - rtl/dla_pe_array.v
+      - rtl/dla_pe_row.v
+      - rtl/dla_pe.v
+      - rtl/dla_ppe_acc.v
+      - rtl/dla_ppe_act.v
+      - rtl/dla_ppe_mux.v
+      - rtl/dla_ppe_pe.v
+      - rtl/dla_ppe.v
+      - rtl/dla_scheduler_comp.v
+      - rtl/dla_scheduler_ppe.v
+      - rtl/dla_ctrl_conv.v
+      - rtl/dla_ctrl_fbload_conv.v
+      - rtl/dla_ctrl_fbload_fc.v
+      - rtl/dla_ctrl_fc.v
+      - rtl/dla_ctrl_gb2lb.v
+      - rtl/dla_ctrl_mng.v
+      - rtl/dla_ctrl_ppe.v
+      - rtl/dla_ctrl.v
+      - rtl/dla_ddr_mif.v
+      - rtl/dla_ddr_mng.v
+      - rtl/dla_regif_comp.v
+      - rtl/dla_regif_ddr2gb.v
+      - rtl/dla_regif_gb2lb.v
+      - rtl/dla_regif_ppe.v
+      - rtl/dla_regif_status.v
+      - rtl/dla_regif.v
+      - rtl/dla_abuf_mng.v
+      - rtl/dla_abuf.v
+      - rtl/dla_acc_buf.v
+      - rtl/dla_fbuf_mng.v
+      - rtl/dla_fbuf.v
+      - rtl/dla_freg.v
+      - rtl/dla_ibuf_mng.v
+      - rtl/dla_ibuf.v
+      - rtl/dla_lbuf_mng.v
+      - rtl/dla_lbuf.v
+      - rtl/dla_pbuf_mng.v
+      - rtl/dla_pbuf.v
+      - rtl/dla_sbuf_mng.v
+      - rtl/dla_sbuf.v
+      - rtl/dla_wbuf_mng.v
+      - rtl/dla_wbuf.v
+      - rtl/ddr_ram_interface.sv
+      - rtl/dla.sv
+    file_type: systemVerilogSource
+
+  files_verilator_waiver:
+    depend:
+      # common waivers
+      - lowrisc:lint:common
+      - lowrisc:lint:comportable
+    files:
+      - lint/dla.vlt
+    file_type: vlt
+
+  files_ascentlint_waiver:
+    depend:
+      # common waivers
+      - lowrisc:lint:common
+      - lowrisc:lint:comportable
+    files:
+      - lint/dla.waiver
+    file_type: waiver
+
+  files_veriblelint_waiver:
+    depend:
+      # common waivers
+      - lowrisc:lint:common
+      - lowrisc:lint:comportable
+
+parameters:
+  SYNTHESIS:
+    datatype: bool
+    paramtype: vlogdefine
+
+targets:
+  default: &default_target
+    filesets:
+      - tool_verilator   ? (files_verilator_waiver)
+      - tool_ascentlint  ? (files_ascentlint_waiver)
+      - tool_veriblelint ? (files_veriblelint_waiver)
+      - files_rtl
+    toplevel: dla
+
+  lint:
+    <<: *default_target
+    default_tool: verilator
+    parameters:
+      - SYNTHESIS=true
+    tools:
+      verilator:
+        mode: lint-only
+        verilator_options:
+          - "-Wall"

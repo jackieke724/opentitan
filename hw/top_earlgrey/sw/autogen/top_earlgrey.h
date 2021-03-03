@@ -493,6 +493,24 @@ extern "C" {
  */
 #define TOP_EARLGREY_OTBN_SIZE_BYTES 0x10000u
 
+/**
+ * Peripheral base address for dla in top earlgrey.
+ *
+ * This should be used with #mmio_region_from_addr to access the memory-mapped
+ * registers associated with the peripheral (usually via a DIF).
+ */
+#define TOP_EARLGREY_DLA_BASE_ADDR 0x40060000u
+
+/**
+ * Peripheral size for dla in top earlgrey.
+ *
+ * This is the size (in bytes) of the peripheral's reserved memory area. All
+ * memory-mapped registers associated with this peripheral should have an
+ * address between #TOP_EARLGREY_DLA_BASE_ADDR and
+ * `TOP_EARLGREY_DLA_BASE_ADDR + TOP_EARLGREY_DLA_SIZE_BYTES`.
+ */
+#define TOP_EARLGREY_DLA_SIZE_BYTES 0x2000u
+
 
 /**
  * Memory base address for rom in top earlgrey.
@@ -555,7 +573,8 @@ typedef enum top_earlgrey_plic_peripheral {
   kTopEarlgreyPlicPeripheralOtbn = 10, /**< otbn */
   kTopEarlgreyPlicPeripheralKeymgr = 11, /**< keymgr */
   kTopEarlgreyPlicPeripheralKmac = 12, /**< kmac */
-  kTopEarlgreyPlicPeripheralLast = 12, /**< \internal Final PLIC peripheral */
+  kTopEarlgreyPlicPeripheralDla = 13, /**< dla */
+  kTopEarlgreyPlicPeripheralLast = 13, /**< \internal Final PLIC peripheral */
 } top_earlgrey_plic_peripheral_t;
 
 /**
@@ -651,7 +670,8 @@ typedef enum top_earlgrey_plic_irq_id {
   kTopEarlgreyPlicIrqIdKmacKmacDone = 83, /**< kmac_kmac_done */
   kTopEarlgreyPlicIrqIdKmacFifoEmpty = 84, /**< kmac_fifo_empty */
   kTopEarlgreyPlicIrqIdKmacKmacErr = 85, /**< kmac_kmac_err */
-  kTopEarlgreyPlicIrqIdLast = 85, /**< \internal The Last Valid Interrupt ID. */
+  kTopEarlgreyPlicIrqIdDlaDone = 86, /**< dla_done */
+  kTopEarlgreyPlicIrqIdLast = 86, /**< \internal The Last Valid Interrupt ID. */
 } top_earlgrey_plic_irq_id_t;
 
 /**
@@ -661,7 +681,7 @@ typedef enum top_earlgrey_plic_irq_id {
  * `top_earlgrey_plic_peripheral_t`.
  */
 extern const top_earlgrey_plic_peripheral_t
-    top_earlgrey_plic_interrupt_for_peripheral[86];
+    top_earlgrey_plic_interrupt_for_peripheral[87];
 
 /**
  * PLIC Interrupt Target.
@@ -945,7 +965,8 @@ typedef enum top_earlgrey_hintable_clocks {
   kTopEarlgreyHintableClocksMainHmac = 1, /**< Clock clk_main_hmac in group trans */
   kTopEarlgreyHintableClocksMainKmac = 2, /**< Clock clk_main_kmac in group trans */
   kTopEarlgreyHintableClocksMainOtbn = 3, /**< Clock clk_main_otbn in group trans */
-  kTopEarlgreyHintableClocksLast = 3, /**< \internal Last Valid Hintable Clock */
+  kTopEarlgreyHintableClocksMainDla = 4, /**< Clock clk_main_dla in group trans */
+  kTopEarlgreyHintableClocksLast = 4, /**< \internal Last Valid Hintable Clock */
 } top_earlgrey_hintable_clocks_t;
 
 // Header Extern Guard

@@ -1,0 +1,21 @@
+// Copyright lowRISC contributors.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+
+{
+    name:               "dla",
+    design_spec:        "hw/ip/dla/doc",
+    dv_doc:             "hw/ip/dla/doc/dv",
+    hw_checklist:       "hw/ip/dla/doc/checklist",
+    sw_checklist:       "sw/device/lib/dif/dif_dla",
+    revisions: [
+      {
+        version:            "0.1",
+        life_stage:         "L0",
+        design_stage:       "D0",
+        verification_stage: "V0",
+        commit_id:          "",
+        notes:              ""
+      }
+    ]
+}

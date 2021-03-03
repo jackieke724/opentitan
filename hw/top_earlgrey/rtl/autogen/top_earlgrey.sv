@@ -162,9 +162,10 @@ module top_earlgrey #(
   // alert_handler
   // nmi_gen
   // otbn
+  // dla
 
 
-  logic [85:0]  intr_vector;
+  logic [86:0]  intr_vector;
   // Interrupt source list
   logic intr_uart_tx_watermark;
   logic intr_uart_rx_watermark;
@@ -234,6 +235,7 @@ module top_earlgrey #(
   logic intr_nmi_gen_esc1;
   logic intr_nmi_gen_esc2;
   logic intr_otbn_done;
+  logic intr_dla_done;
 
 
 
@@ -281,7 +283,7 @@ module top_earlgrey #(
   keymgr_pkg::hw_key_req_t       keymgr_kmac_key;
   keymgr_pkg::kmac_data_req_t       keymgr_kmac_data_req;
   keymgr_pkg::kmac_data_rsp_t       keymgr_kmac_data_rsp;
-  logic [3:0] clkmgr_idle;
+  logic [4:0] clkmgr_idle;
   otp_ctrl_pkg::otp_lc_data_t       otp_ctrl_otp_lc_data;
   otp_ctrl_pkg::lc_otp_program_req_t       lc_ctrl_lc_otp_program_req;
   otp_ctrl_pkg::lc_otp_program_rsp_t       lc_ctrl_lc_otp_program_rsp;
@@ -338,6 +340,8 @@ module top_earlgrey #(
   tlul_pkg::tl_d2h_t       nmi_gen_tl_rsp;
   tlul_pkg::tl_h2d_t       otbn_tl_req;
   tlul_pkg::tl_d2h_t       otbn_tl_rsp;
+  tlul_pkg::tl_h2d_t       dla_tl_req;
+  tlul_pkg::tl_d2h_t       dla_tl_rsp;
   tlul_pkg::tl_h2d_t       keymgr_tl_req;
   tlul_pkg::tl_d2h_t       keymgr_tl_rsp;
   tlul_pkg::tl_h2d_t       uart_tl_req;
@@ -1395,8 +1399,22 @@ module top_earlgrey #(
       .rst_ni (rstmgr_resets.rst_sys_n[rstmgr_pkg::Domain0Sel])
   );
 
+  dla u_dla (
+
+      // Interrupt
+      .intr_done_o (intr_dla_done),
+
+      // Inter-module signals
+      .idle_o(clkmgr_idle[4]),
+      .tl_i(dla_tl_req),
+      .tl_o(dla_tl_rsp),
+      .clk_i (clkmgr_clocks.clk_main_dla),
+      .rst_ni (rstmgr_resets.rst_sys_n[rstmgr_pkg::Domain0Sel])
+  );
+
   // interrupt assignments
   assign intr_vector = {
+      intr_dla_done,
       intr_kmac_kmac_err,
       intr_kmac_fifo_empty,
       intr_kmac_kmac_done,
@@ -1548,6 +1566,10 @@ module top_earlgrey #(
     // port: tl_otbn
     .tl_otbn_o(otbn_tl_req),
     .tl_otbn_i(otbn_tl_rsp),
+
+    // port: tl_dla
+    .tl_dla_o(dla_tl_req),
+    .tl_dla_i(dla_tl_rsp),
 
     // port: tl_keymgr
     .tl_keymgr_o(keymgr_tl_req),

@@ -143,6 +143,20 @@ sw_lib_dif_otbn = declare_dependency(
   )
 )
 
+# DLA DIF library
+sw_lib_dif_dla = declare_dependency(
+  link_with: static_library(
+    'sw_lib_dif_dla',
+    sources: [
+      hw_ip_dla_reg_h,
+      'dif_dla.c',
+    ],
+    dependencies: [
+      sw_lib_mmio,
+    ],
+  )
+)
+
 # Reset Manager DIF library (dif_rstmgr)
 sw_lib_dif_rstmgr = declare_dependency(
   link_with: static_library(

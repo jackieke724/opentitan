@@ -28,6 +28,7 @@ filesets:
       - lowrisc:ip:hmac
       - lowrisc:ip:kmac
       - lowrisc:ip:otbn
+      - lowrisc:ip:dla
       - lowrisc:prim:ram_1p_adv
       - lowrisc:prim:rom_adv
       - lowrisc:prim:flash

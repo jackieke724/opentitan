@@ -106,6 +106,7 @@
           clk_main_hmac: main
           clk_main_kmac: main
           clk_main_otbn: main
+          clk_main_dla: main
         }
       }
       {
@@ -2198,7 +2199,7 @@
           name: idle
           act: rcv
           package: ""
-          width: 4
+          width: 5
           inst_name: clkmgr
           default: ""
           top_type: one-to-N
@@ -4796,6 +4797,80 @@
         }
       ]
     }
+    {
+      name: dla
+      type: dla
+      clock_srcs:
+      {
+        clk_i: main
+      }
+      clock_group: trans
+      reset_connections:
+      {
+        rst_ni: rstmgr_resets.rst_sys_n[rstmgr_pkg::Domain0Sel]
+      }
+      base_addr: 0x40060000
+      clock_reset_export: []
+      clock_connections:
+      {
+        clk_i: clkmgr_clocks.clk_main_dla
+      }
+      domain: "0"
+      size: 0x2000
+      bus_device: tlul
+      bus_host: none
+      available_input_list: []
+      available_output_list: []
+      available_inout_list: []
+      param_list: []
+      interrupt_list:
+      [
+        {
+          name: done
+          width: 1
+          bits: "0"
+          bitinfo:
+          [
+            1
+            1
+            0
+          ]
+          type: interrupt
+        }
+      ]
+      alert_list: []
+      wakeup_list: []
+      reset_request_list: []
+      scan: "false"
+      scan_reset: "false"
+      inter_signal_list:
+      [
+        {
+          name: idle
+          type: uni
+          struct: logic
+          width: 1
+          act: req
+          inst_name: dla
+          default: ""
+          package: ""
+          top_signame: clkmgr_idle
+          index: 4
+        }
+        {
+          struct: tl
+          package: tlul_pkg
+          type: req_rsp
+          act: rsp
+          name: tl
+          inst_name: dla
+          width: 1
+          default: ""
+          top_signame: dla_tl
+          index: -1
+        }
+      ]
+    }
   ]
   memory:
   [
@@ -5117,6 +5192,7 @@
         hmac.idle
         kmac.idle
         otbn.idle
+        dla.idle
       ]
       otp_ctrl.otp_lc_data:
       [
@@ -5253,6 +5329,10 @@
       otbn.tl:
       [
         main.tl_otbn
+      ]
+      dla.tl:
+      [
+        main.tl_dla
       ]
       keymgr.tl:
       [
@@ -5395,6 +5475,7 @@
           otbn
           keymgr
           kmac
+          dla
         ]
         dm_sba:
         [
@@ -5416,6 +5497,7 @@
           nmi_gen
           otbn
           kmac
+          dla
         ]
       }
       nodes:
@@ -5542,7 +5624,11 @@
             }
             {
               base_addr: 0x40000000
-              size_byte: 0x421000
+              size_byte: 0x51000
+            }
+            {
+              base_addr: 0x40100000
+              size_byte: 0x321000
             }
             {
               base_addr: 0x40500000
@@ -5794,6 +5880,24 @@
             {
               base_addr: 0x411d0000
               size_byte: 0x10000
+            }
+          ]
+          xbar: false
+          stub: false
+          pipeline: "true"
+        }
+        {
+          name: dla
+          type: device
+          clock: clk_main_i
+          reset: rst_main_ni
+          pipeline_byp: "false"
+          inst_type: dla
+          addr_range:
+          [
+            {
+              base_addr: 0x40060000
+              size_byte: 0x2000
             }
           ]
           xbar: false
@@ -6085,6 +6189,18 @@
           width: 1
           default: ""
           top_signame: otbn_tl
+          index: -1
+        }
+        {
+          struct: tl
+          type: req_rsp
+          name: tl_dla
+          act: req
+          package: tlul_pkg
+          inst_name: main
+          width: 1
+          default: ""
+          top_signame: dla_tl
           index: -1
         }
         {
@@ -6575,6 +6691,7 @@
     otbn
     keymgr
     kmac
+    dla
   ]
   interrupt:
   [
@@ -7279,6 +7396,19 @@
       ]
       type: interrupt
       module_name: kmac
+    }
+    {
+      name: dla_done
+      width: 1
+      bits: "0"
+      bitinfo:
+      [
+        1
+        1
+        0
+      ]
+      type: interrupt
+      module_name: dla
     }
   ]
   alert_module:
@@ -8819,7 +8949,7 @@
         name: idle
         act: rcv
         package: ""
-        width: 4
+        width: 5
         inst_name: clkmgr
         default: ""
         top_type: one-to-N
@@ -9629,6 +9759,30 @@
         index: -1
       }
       {
+        name: idle
+        type: uni
+        struct: logic
+        width: 1
+        act: req
+        inst_name: dla
+        default: ""
+        package: ""
+        top_signame: clkmgr_idle
+        index: 4
+      }
+      {
+        struct: tl
+        package: tlul_pkg
+        type: req_rsp
+        act: rsp
+        name: tl
+        inst_name: dla
+        width: 1
+        default: ""
+        top_signame: dla_tl
+        index: -1
+      }
+      {
         struct: tl
         package: tlul_pkg
         type: req_rsp
@@ -10014,6 +10168,18 @@
         width: 1
         default: ""
         top_signame: otbn_tl
+        index: -1
+      }
+      {
+        struct: tl
+        type: req_rsp
+        name: tl_dla
+        act: req
+        package: tlul_pkg
+        inst_name: main
+        width: 1
+        default: ""
+        top_signame: dla_tl
         index: -1
       }
       {
@@ -10621,7 +10787,7 @@
         package: ""
         struct: logic
         signame: clkmgr_idle
-        width: 4
+        width: 5
         type: uni
         default: ""
       }
@@ -11069,6 +11235,22 @@
         package: tlul_pkg
         struct: tl_d2h
         signame: otbn_tl_rsp
+        width: 1
+        type: req_rsp
+        default: ""
+      }
+      {
+        package: tlul_pkg
+        struct: tl_h2d
+        signame: dla_tl_req
+        width: 1
+        type: req_rsp
+        default: ""
+      }
+      {
+        package: tlul_pkg
+        struct: tl_d2h
+        signame: dla_tl_rsp
         width: 1
         type: req_rsp
         default: ""

@@ -1,0 +1,1096 @@
+// Copyright lowRISC contributors.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+{ name: "dla"
+  clock_primary: "clk_i"
+  bus_device: "tlul"
+  bus_host: "none"
+  interrupt_list: [
+    { name: "done"
+      desc: "DLA has completed the operation"
+    }
+  ]
+
+  inter_signal_list: [
+    // TODO: CSRNG isn't committed yet, depends on assumed interface done for
+    // AES in https://github.com/lowRISC/opentitan/pull/2140.
+    /*{ name:    "entropy",
+      type:    "req_rsp",
+      act:     "req",
+      package: "csrng_pkg",
+      struct:  "csrng_entropy",
+      width:   "1"
+    },*/
+
+    // DLA is not performing any operation and can be clock/power-gated.
+    { name:    "idle",
+      type:    "uni",
+      struct:  "logic",
+      width:   "1",
+      act:     "req",
+    }
+  ]
+
+  regwidth: "32"
+  registers: [
+    //Global Control & Status (GST)
+    { name: "GST_STATUS"
+      desc: "Global Status",
+      swaccess: "ro",
+      hwaccess: "hwo",
+      fields: [
+        { bits: "0"
+          name: "ddr2gb"
+          desc: '''
+            When 1, a MOV_DDR2GB operation is being performed.
+          '''
+        }
+        { bits: "1"
+          name: "gb2lb"
+          desc: '''
+            When 1, a MOV_GB2LB operation is being performed.
+          '''
+        }
+        { bits: "2"
+          name: "conv"
+          desc: '''
+            When 1, a COMP_CONV operation is being performed.
+          '''
+        }
+        { bits: "3"
+          name: "fc"
+          desc: '''
+            When 1, a COMP_FC operation is being performed.
+          '''
+        }
+        { bits: "4"
+          name: "ppe"
+          desc: '''
+            When 1, a COMP_PPE operation is being performed.
+          '''
+        }
+      ]
+    }
+    { name: "GST_INTR",
+      desc: "Interrupt",
+      swaccess: "rw",
+      hwaccess: "hrw",
+      fields: [
+        { bits: "0"
+          name: "ddr2gb"
+          desc: '''
+            When 1, a MOV_DDR2GB operation has just finished.
+          '''
+        }
+        { bits: "1"
+          name: "gb2lb"
+          desc: '''
+            When 1, a MOV_GB2LB operation has just finished.
+          '''
+        }
+        { bits: "2"
+          name: "conv"
+          desc: '''
+            When 1, a COMP_CONV operation has just finished.
+          '''
+        }
+        { bits: "3"
+          name: "fc"
+          desc: '''
+            When 1, a COMP_FC operation has just finished.
+          '''
+        }
+        { bits: "4"
+          name: "ppe"
+          desc: '''
+            When 1, a COMP_PPE operation has just finished.
+          '''
+        }
+      ]
+    }
+    { name: "GST_ENABLE_ROW",
+      desc: "Row Enable",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0",
+          desc: '''
+            When row[N] is 0, the PE row[N] is halted.
+          '''
+        }
+      ]
+    }
+    { name: "GST_ENABLE_COL",
+      desc: "Column Enable",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0",
+          desc: '''
+            When col[N] is 0, the PE col[N] and the corresponding post-process engine are halted.
+          '''
+        }
+      ]
+    }
+    { name: "GST_COMP_STATE",
+      desc: "Computation State",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "0"
+          name: "comp"
+          desc: '''
+            When processing CONV or FC, this value should be set to 1.
+          '''
+        }
+        { bits: "1"
+          name: "ppe"
+          desc: '''
+            When processing PPE, this value should be set to 1.
+          '''
+        }
+      ]
+    }
+    
+    //MOV DDR-GBuf (MOV_DDR2GB)
+    { name: "DDR2GB_CTRL",
+      desc: "Control",
+      swaccess: "rw",
+      hwaccess: "hro",
+      hwqe:  "true",
+      fields: [
+        { bits: "0"
+          name: "direction"
+          desc: '''
+            1'b0, DDR->GBuf;
+            1'b1, GBuf->DDR
+          '''
+        }
+        { bits: "31"
+          name: "go"
+          desc: '''
+            Start signal of MOV_DDR2GB.
+          '''
+        }
+      ]
+    }
+    { name: "DDR2GB_DDR_ADDR0",
+      desc: "DDR Address 0",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0",
+          desc: '''
+            Bits [31:0] of the DDR burst address.
+          '''
+        }
+      ]
+    }
+    { name: "DDR2GB_DDR_ADDR1",
+      desc: "DDR Address 1",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "21:0",
+          desc: '''
+            Bits [53:32] of the DDR burst address.
+          '''
+        }
+      ]
+    }
+    { name: "DDR2GB_GB_ADDR",
+      desc: "GBuf Address",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "10:0"
+          name: "addr"
+          desc: '''
+            The start address of the global buffer.
+          '''
+        }
+        { bits: "14:12"
+          name: "mux"
+          desc: '''
+            3'd0: DDR<->FBUF;
+            3'd1: DDR<->WBUF;
+            3'd2: DDR<->IBUF;
+            3'd3: DDR<->ABUF;
+            3'd4: DDR<->SBUF;
+            others: reserved
+          '''
+        }
+        { bits: "21:16"
+          name: "idx"
+          desc: '''
+            FBUF: idx 0, 1, 2, 3 selects FBUF 0-3, 4-7, 8-11, 12-15 for access;
+            WBUF: idx 0-31 selects WBUF 0-31;
+            IBUF: idx 0-31 selects IBUF 0-31;
+            ABUF: idx 0-7 selects ABUF 0-7;
+            SBUF: idx 0-1 selects SBUF 0-1.
+          '''
+        }
+        { bits: "31:24"
+          name: "burst_len"
+          desc: '''
+            0-indexed
+          '''
+        }
+      ]
+    }
+    
+    //MOV GBuf-LBuf (MOV_GB2LB)
+    { name: "GB2LB_CTRL",
+      desc: "Control",
+      swaccess: "rw",
+      hwaccess: "hro",
+      hwqe:  "true",
+      fields: [
+        { bits: "0"
+          name: "mode"
+          desc: '''
+            Transition mode. 0 for insert, 1 for flat.
+          '''
+        }
+        { bits: "31"
+          name: "go"
+          desc: '''
+            Start signal of MOV_GB2LB.
+          '''
+        }
+      ]
+    }
+    { name: "GB2LB_ADDR",
+      desc: "Source Address",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "10:0",
+          name: "src_addr",
+          desc: '''
+            Source address of FBUF.
+          '''
+        }
+        { bits: "24:16",
+          name: "dest_addr",
+          desc: '''
+            Destination address of LBUF.
+          '''
+        }
+      ]
+    }
+    { name: "GB2LB_SRC0",
+      desc: "Source 0",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "10:0",
+          name: "skip",
+          desc: '''
+            1-indexed.
+          '''
+        }
+        { bits: "21:16",
+          name: "iter",
+          desc: '''
+            0-indexed.
+          '''
+        }
+      ]
+    }
+    { name: "GB2LB_SRC1",
+      desc: "Source 1",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "10:0",
+          name: "len",
+          desc: '''
+            0-indexed.
+          '''
+        }
+        { bits: "26:16",
+          name: "dila",
+          desc: '''
+            1-indexed.
+          '''
+        }
+      ]
+    }
+    
+    //Computation (COMP_CONV/COMP_FC)
+    { name: "COMP_CTRL",
+      desc: "Control",
+      swaccess: "rw",
+      hwaccess: "hro",
+      hwqe:  "true",
+      fields: [
+        { bits: "1:0"
+          name: "mode_comp"
+          desc: '''
+            2'd0, CONV;
+            2'd1, FC.
+          '''
+        }
+        { bits: "3:2"
+          name: "mode_spar"
+          desc: '''
+            2'd0, dense;
+            2'd1 sparsity pattern;
+            2'd2, COO;
+            2'd3, reserved.
+          '''
+        }
+        { bits: "30"
+          name: "go_conv"
+          desc: '''
+            The start signal of COMP_CONV.
+          '''
+        }
+        { bits: "31"
+          name: "go_fc"
+          desc: '''
+            The start signal of COMP_FC.
+          '''
+        }
+      ]
+    }
+    { name: "COMP_K_SIZE",
+      desc: "Kernel Size",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "3:0",
+          name: "k_size",
+          desc: '''
+            1-indexed. The kernel size of CONV. For FC, this value should be set to 1.
+          '''
+        }
+        { bits: "20:16",
+          name: "k_scale",
+          desc: '''
+            The scaler of 8-bit weight in dynamical fix-point.
+          '''
+        }
+      ]
+    }
+    { name: "COMP_F_SIZE",
+      desc: "Feature Size",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "7:0",
+          name: "if_len",
+          desc: '''
+            0-indexed. The length of input time sequence including padding.
+          '''
+        }
+        { bits: "23:16",
+          name: "of_len",
+          desc: '''
+            0-indexed. The length of output time sequence.
+          '''
+        }
+      ]
+    }
+    { name: "COMP_C_SIZE",
+      desc: "Channel Size",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "7:0",
+          name: "if_chl",
+          desc: '''
+            1-indexed. The number of the input channel. 
+            When REGMAP_COMP_CTRL.mode_comp == 2'd1 or 2'd2, 
+            this value is the number of weight sub-matrix for successive process in FC computation. 
+            For Conv, this value can be ignored.
+          '''
+        }
+        { bits: "23:16",
+          name: "of_chl",
+          desc: '''
+            1-indexed. The number of the output channel. 
+            When REGMAP_COMP_CTRL.mode_comp == 2'd1 or 2'd2, 
+            this value is the number of the non-zero weights in the sub-matrix.
+          '''
+        }
+      ]
+    }
+    { name: "COMP_P_SIZE",
+      desc: "Pad Size",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "7:0",
+          name: "pad_left",
+          desc: '''
+            1-indexed. Valid only for CONV. Left padding.
+          '''
+        }
+        { bits: "15:8",
+          name: "pad_right",
+          desc: '''
+            1-indexed. Valid only for CONV. Right padding.
+          '''
+        }
+        { bits: "31:16",
+          name: "pad_num",
+          desc: '''
+            The 16-bit padding number in minifloat. The default valid is 16'b0.
+          '''
+        }
+      ]
+    }
+    { name: "COMP_FBLOAD",
+      desc: "Ping-Pong Register Configuration",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "7:0",
+          name: "col",
+          desc: '''
+            1-indexed. The number of input channels/columns covered by weight sub-matrix. 
+            For REGMAP_COMP_CTRL.mode_spar == 2'd0, this value is set to 1.
+          '''
+        }
+        { bits: "15:8",
+          name: "row",
+          desc: '''
+            1-indexed. The number of output channels/rows covered by the weight sub-matrix. 
+            For REGMAP_COMP_CTRL.mode_spar == 2'd0, this value is equal to REGMAP_COMP_C_SIZE.of_chl.
+          '''
+        }
+      ]
+    }
+    { name: "COMP_ADDR",
+      desc: "Source Address",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "8:0",
+          name: "lbuf_addr",
+          desc: '''
+            Source address of feature in LBUF for computation.
+          '''
+        }
+        { bits: "21:12",
+          name: "wbuf_addr",
+          desc: '''
+            Source address of weights in WBUF for computation.
+          '''
+        }
+        { bits: "30:24",
+          name: "ibuf_addr",
+          desc: '''
+            Source address of indices in IBUF for computation.
+          '''
+        }
+      ]
+    }
+    
+    //Post Process (PPE)
+    { name: "PPE_CTRL",
+      desc: "Control",
+      swaccess: "rw",
+      hwaccess: "hro",
+      hwqe:  "true",
+      fields: [
+        { bits: "1:0",
+          name: "ctrl",
+          desc: '''
+            2'd1, the accumulation for psum in PBUF. After accumulation, the PBUF will be reset;
+            2'd2, post process.
+          '''
+        }
+        { bits: "3:2",
+          name: "post",
+          desc: '''
+            2'd0, write the results to ACC_BUF in PPE only after post process;
+            2'd1, write the results to FBUF only;
+            2'd2, write the results to ACC_BUF and FBUF;
+            2'd3, reserved.
+          '''
+        }
+        { bits: "4",
+          name: "mode",
+          desc: '''
+            Transition mode. 0 for insert, 1 for flat.
+          '''
+        }
+        { bits: "5",
+          name: "rst",
+          desc: '''
+            When 1, reset the PBUF and ACC_BUF to 0. Valid only when ctrl = 2'd1.
+          '''
+        }
+        { bits: "16",
+          name: "act",
+          desc: '''
+            When 1, activation function enable.
+          '''
+        }
+        { bits: "17",
+          name: "elem",
+          desc: '''
+            When 1, element-wise operation enable.
+          '''
+        }
+        { bits: "19:18",
+          name: "bias",
+          desc: '''
+            	2'd1, bias enable; 2'd2, BN enable.
+          '''
+        }
+        { bits: "20",
+          name: "pass",
+          desc: '''
+            When 1, the accumulated results in ACC_BUF are sent to FBUF directly.
+          '''
+        }
+        { bits: "22:21",
+          name: "oper",
+          desc: '''
+            	2'd0, bypass;
+              2'd1, mul only;
+              2'd2, add only;
+              2'd3, mul and add enable.
+          '''
+        }
+        { bits: "27:24",
+          name: "row_num",
+          desc: '''
+            0-indexed. The number of enabled PE row.
+          '''
+        }
+        { bits: "31",
+          name: "go",
+          desc: '''
+            Start signal of COMP_PPE.
+          '''
+        }
+      ]
+    }
+    { name: "PPE_FBUF_ADDR",
+      desc: "FBUF Address",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "10:0",
+          name: "fbuf_src",
+          desc: '''
+            The source address of FBUF for element-wise operation.
+          '''
+        }
+        { bits: "26:16",
+          name: "fbuf_dest",
+          desc: '''
+            The destination address of FBUF for results writing back.
+          '''
+        }
+      ]
+    }
+    { name: "PPE_ABUF_ADDR",
+      desc: "ABUF Address",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "9:0",
+          desc: '''
+            The source address of ABUF for bias/BN paramters.
+          '''
+        }
+      ]
+    }
+    { name: "PPE_SKIP",
+      desc: "Skip",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "10:0",
+          name: "src_skip",
+          desc: '''
+            1-indexed. The value of skip for FBUF read.
+          '''
+        }
+        { bits: "26:16",
+          name: "dest_skip",
+          desc: '''
+            1-indexed. The value of skip for FBUF write.
+          '''
+        }
+      ]
+    }
+    { name: "PPE_DILA",
+      desc: "Dilation",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "10:0",
+          name: "src_dila",
+          desc: '''
+            1-indexed. The dilation rate for FBUF read.
+          '''
+        }
+        { bits: "26:16",
+          name: "dest_dila",
+          desc: '''
+            1-indexed. The dilation rate for FBUF write.
+          '''
+        }
+      ]
+    }
+    { name: "PPE_SIZE",
+      desc: "Size",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "5:0",
+          name: "len",
+          desc: '''
+            0-indexed. The length in one transition.
+          '''
+        }
+        { bits: "22:16",
+          name: "iter",
+          desc: '''
+            1-indexed. The number of transition iteration.
+          '''
+        }
+      ]
+    }
+    { name: "PPE_ACT_K0",
+      desc: "Activation Function Gradient 0",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0",
+          name: "act_k0",
+          desc: '''
+          '''
+        }
+        { bits: "31:16",
+          name: "act_k1",
+          desc: '''
+          '''
+        }
+      ]
+    }
+    { name: "PPE_ACT_K1",
+      desc: "Activation Function Gradient 1",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0",
+          name: "act_k2",
+          desc: '''
+          '''
+        }
+        { bits: "31:16",
+          name: "act_k3",
+          desc: '''
+          '''
+        }
+      ]
+    }
+    { name: "PPE_ACT_K2",
+      desc: "Activation Function Gradient 2",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0",
+          name: "act_k4",
+          desc: '''
+          '''
+        }
+        { bits: "31:16",
+          name: "act_k5",
+          desc: '''
+          '''
+        }
+      ]
+    }
+    { name: "PPE_ACT_K3",
+      desc: "Activation Function Gradient 3",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0",
+          name: "act_k6",
+          desc: '''
+          '''
+        }
+        { bits: "31:16",
+          name: "act_k7",
+          desc: '''
+          '''
+        }
+      ]
+    }
+    { name: "PPE_ACT_K4",
+      desc: "Activation Function Gradient 4",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0",
+          name: "act_k8",
+          desc: '''
+          '''
+        }
+        { bits: "31:16",
+          name: "act_k9",
+          desc: '''
+          '''
+        }
+      ]
+    }
+    { name: "PPE_ACT_K5",
+      desc: "Activation Function Gradient 5",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0",
+          name: "act_k10",
+          desc: '''
+          '''
+        }
+        { bits: "31:16",
+          name: "act_k11",
+          desc: '''
+          '''
+        }
+      ]
+    }
+    { name: "PPE_ACT_K6",
+      desc: "Activation Function Gradient 6",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0",
+          name: "act_k12",
+          desc: '''
+          '''
+        }
+        { bits: "31:16",
+          name: "act_k13",
+          desc: '''
+          '''
+        }
+      ]
+    }
+    { name: "PPE_ACT_K7",
+      desc: "Activation Function Gradient 7",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0",
+          name: "act_k14",
+          desc: '''
+          '''
+        }
+        { bits: "31:16",
+          name: "act_k15",
+          desc: '''
+          '''
+        }
+      ]
+    }
+    { name: "PPE_ACT_B0",
+      desc: "Activation Function Intercept 0",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0",
+          name: "act_b0",
+          desc: '''
+          '''
+        }
+        { bits: "31:16",
+          name: "act_b1",
+          desc: '''
+          '''
+        }
+      ]
+    }
+    { name: "PPE_ACT_B1",
+      desc: "Activation Function Intercept 1",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0",
+          name: "act_b2",
+          desc: '''
+          '''
+        }
+        { bits: "31:16",
+          name: "act_b3",
+          desc: '''
+          '''
+        }
+      ]
+    }
+    { name: "PPE_ACT_B2",
+      desc: "Activation Function Intercept 2",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0",
+          name: "act_b4",
+          desc: '''
+          '''
+        }
+        { bits: "31:16",
+          name: "act_b5",
+          desc: '''
+          '''
+        }
+      ]
+    }
+    { name: "PPE_ACT_B3",
+      desc: "Activation Function Intercept 3",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0",
+          name: "act_b6",
+          desc: '''
+          '''
+        }
+        { bits: "31:16",
+          name: "act_b7",
+          desc: '''
+          '''
+        }
+      ]
+    }
+    { name: "PPE_ACT_B4",
+      desc: "Activation Function Intercept 4",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0",
+          name: "act_b8",
+          desc: '''
+          '''
+        }
+        { bits: "31:16",
+          name: "act_b9",
+          desc: '''
+          '''
+        }
+      ]
+    }
+    { name: "PPE_ACT_B5",
+      desc: "Activation Function Intercept 5",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0",
+          name: "act_b10",
+          desc: '''
+          '''
+        }
+        { bits: "31:16",
+          name: "act_b11",
+          desc: '''
+          '''
+        }
+      ]
+    }
+    { name: "PPE_ACT_B6",
+      desc: "Activation Function Intercept 6",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0",
+          name: "act_b12",
+          desc: '''
+          '''
+        }
+        { bits: "31:16",
+          name: "act_b13",
+          desc: '''
+          '''
+        }
+      ]
+    }
+    { name: "PPE_ACT_B7",
+      desc: "Activation Function Intercept 7",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0",
+          name: "act_b14",
+          desc: '''
+          '''
+        }
+        { bits: "31:16",
+          name: "act_b15",
+          desc: '''
+          '''
+        }
+      ]
+    }
+    { name: "PPE_ACT_X0",
+      desc: "Activation Function Range 0",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0",
+          name: "act_x0",
+          desc: '''
+          '''
+        }
+        { bits: "31:16",
+          name: "act_x1",
+          desc: '''
+          '''
+        }
+      ]
+    }
+    { name: "PPE_ACT_X1",
+      desc: "Activation Function Range 1",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0",
+          name: "act_x2",
+          desc: '''
+          '''
+        }
+        { bits: "31:16",
+          name: "act_x3",
+          desc: '''
+          '''
+        }
+      ]
+    }
+    { name: "PPE_ACT_X2",
+      desc: "Activation Function Range 2",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0",
+          name: "act_x4",
+          desc: '''
+          '''
+        }
+        { bits: "31:16",
+          name: "act_x5",
+          desc: '''
+          '''
+        }
+      ]
+    }
+    { name: "PPE_ACT_X3",
+      desc: "Activation Function Range 3",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0",
+          name: "act_x6",
+          desc: '''
+          '''
+        }
+        { bits: "31:16",
+          name: "act_x7",
+          desc: '''
+          '''
+        }
+      ]
+    }
+    { name: "PPE_ACT_X4",
+      desc: "Activation Function Range 4",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0",
+          name: "act_x8",
+          desc: '''
+          '''
+        }
+        { bits: "31:16",
+          name: "act_x9",
+          desc: '''
+          '''
+        }
+      ]
+    }
+    { name: "PPE_ACT_X5",
+      desc: "Activation Function Range 5",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0",
+          name: "act_x10",
+          desc: '''
+          '''
+        }
+        { bits: "31:16",
+          name: "act_x11",
+          desc: '''
+          '''
+        }
+      ]
+    }
+    { name: "PPE_ACT_X6",
+      desc: "Activation Function Range 6",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0",
+          name: "act_x12",
+          desc: '''
+          '''
+        }
+        { bits: "31:16",
+          name: "act_x13",
+          desc: '''
+          '''
+        }
+      ]
+    }
+    { name: "PPE_ACT_X7",
+      desc: "Activation Function Range 7",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "15:0",
+          name: "act_x14",
+          desc: '''
+          '''
+        }
+      ]
+    }
+    /*
+    { name: "SOC2GB_WDATA",
+      desc: "Write data",
+      swaccess: "wo",
+      hwaccess: "hro",
+      hwqe: "true",
+      fields: [
+        { bits: "31:0" }
+      ]
+      tags: [// don't write to wdata - it affects several other csrs
+             "excl:CsrNonInitTests:CsrExclWrite"]
+    }
+    */
+    
+    // Dmem size (given as `items` below) must be a power of two.
+    { window: {
+        name: "DMEM"
+        items: "1024" // 4 kB
+        swaccess: "rw",
+        byte-write: "false",
+        desc: '''
+          Data Memory.
+
+          This register should only be accesed while DLA is not busy,
+          as indicated by the !GST_STATUS.ddr2gb flag.
+          Accesses while DLA is busy are blocking.
+          '''
+      }
+    }
+    
+  ]
+}

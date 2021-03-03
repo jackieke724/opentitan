@@ -38,6 +38,7 @@ IPS ?= aes           \
        otbn          \
        uart          \
        usbdev        \
+       dla           \
        usbuart
 
 TOPS ?= top_earlgrey

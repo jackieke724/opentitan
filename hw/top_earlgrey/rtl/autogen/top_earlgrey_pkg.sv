@@ -272,6 +272,16 @@ package top_earlgrey_pkg;
   parameter int unsigned TOP_EARLGREY_OTBN_SIZE_BYTES = 32'h10000;
 
   /**
+   * Peripheral base address for dla in top earlgrey.
+   */
+  parameter int unsigned TOP_EARLGREY_DLA_BASE_ADDR = 32'h40060000;
+
+  /**
+   * Peripheral size in bytes for dla in top earlgrey.
+   */
+  parameter int unsigned TOP_EARLGREY_DLA_SIZE_BYTES = 32'h2000;
+
+  /**
    * Memory base address for rom in top earlgrey.
    */
   parameter int unsigned TOP_EARLGREY_ROM_BASE_ADDR = 32'h00008000;
