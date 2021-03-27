@@ -8,6 +8,7 @@
 #include "sw/device/lib/dif/dif_spi_device.h"
 #include "sw/device/lib/dif/dif_uart.h"
 #include "sw/device/lib/dif/dif_vec_dot.h"
+#include "sw/device/lib/dif/dif_ddr_ctrl.h"
 #include "sw/device/lib/pinmux.h"
 #include "sw/device/lib/runtime/hart.h"
 #include "sw/device/lib/runtime/log.h"
@@ -21,6 +22,7 @@ static dif_gpio_t gpio;
 static dif_spi_device_t spi;
 static dif_uart_t uart;
 static dif_vec_dot_t vec_dot;
+static dif_ddr_ctrl_t ddr_ctrl;
 
 int main(int argc, char **argv) {
   CHECK(dif_uart_init(
@@ -106,7 +108,21 @@ int main(int argc, char **argv) {
     sum += dest[i];
   }
   LOG_INFO("Destination array sum is %d.", sum);
-
+  
+  CHECK(dif_ddr_ctrl_init(
+			      (dif_ddr_ctrl_params_t){
+                .base_addr =
+                    mmio_region_from_addr(TOP_EARLGREY_DDR_CTRL_BASE_ADDR),
+            },
+            &ddr_ctrl) == kDifDdrCtrlOk);
+  LOG_INFO("Waiting for DDR calibration.");
+  CHECK(dif_ddr_ctrl_init_calib(&ddr_ctrl)== kDifDdrCtrlOk);
+  LOG_INFO("DDR calibration completed.");
+  CHECK(dif_ddr_ctrl_write(&ddr_ctrl, 1234, 0xdeadbeef)== kDifDdrCtrlOk);
+  LOG_INFO("1234 0xdeadbeef sent.");
+  uint32_t data_u=0, data_l=0;
+  CHECK(dif_ddr_ctrl_read(&ddr_ctrl, &data_u, &data_l)== kDifDdrCtrlOk);
+  LOG_INFO("DDR read data are %d %h.", data_u, data_l);
 
   uint32_t gpio_state = 0;
   while (true) {

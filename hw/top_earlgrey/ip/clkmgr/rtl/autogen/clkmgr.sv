@@ -29,6 +29,7 @@ module clkmgr import clkmgr_pkg::*; (
   input clk_usb_i,
   input rst_usb_ni,
   input clk_aon_i,
+  input clk_ddr_i,
 
   // Resets for derived clocks
   // clocks are derived locally
@@ -47,7 +48,7 @@ module clkmgr import clkmgr_pkg::*; (
   input scanmode_i,
 
   // idle hints
-  input [4:0] idle_i,
+  input [5:0] idle_i,
 
   // clock output interface
   output clkmgr_ast_out_t clocks_ast_o,
@@ -125,6 +126,10 @@ module clkmgr import clkmgr_pkg::*; (
   prim_clock_buf u_clk_io_div2_powerup_buf (
     .clk_i(clk_io_div2_i),
     .clk_o(clocks_o.clk_io_div2_powerup)
+  );
+  prim_clock_buf u_clk_ddr_ddr_ctrl_buf (
+    .clk_i(clk_ddr_i),
+    .clk_o(clocks_o.clk_ddr_ddr_ctrl)
   );
   prim_clock_buf u_clk_aon_secure_buf (
     .clk_i(clk_aon_i),
@@ -314,6 +319,8 @@ module clkmgr import clkmgr_pkg::*; (
 
   logic clk_main_vec_dot_hint;
   logic clk_main_vec_dot_en;
+  logic clk_main_ddr_ctrl_hint;
+  logic clk_main_ddr_ctrl_en;
   logic clk_main_aes_hint;
   logic clk_main_aes_en;
   logic clk_main_hmac_hint;
@@ -341,6 +348,26 @@ module clkmgr import clkmgr_pkg::*; (
     .en_i(clk_main_vec_dot_en & clk_main_en),
     .test_en_i(scanmode_i),
     .clk_o(clocks_o.clk_main_vec_dot)
+  );
+
+  assign clk_main_ddr_ctrl_en = clk_main_ddr_ctrl_hint | ~idle_i[Ctrl];
+
+  prim_flop_2sync #(
+    .Width(1)
+  ) u_clk_main_ddr_ctrl_hint_sync (
+    .clk_i(clk_main_i),
+    .rst_ni(rst_main_ni),
+    .d_i(reg2hw.clk_hints.clk_main_ddr_ctrl_hint.q),
+    .q_o(clk_main_ddr_ctrl_hint)
+  );
+
+  prim_clock_gating #(
+    .NoFpgaGate(1'b1)
+  ) u_clk_main_ddr_ctrl_cg (
+    .clk_i(clk_main_root),
+    .en_i(clk_main_ddr_ctrl_en & clk_main_en),
+    .test_en_i(scanmode_i),
+    .clk_o(clocks_o.clk_main_ddr_ctrl)
   );
 
   assign clk_main_aes_en = clk_main_aes_hint | ~idle_i[Aes];
@@ -427,6 +454,8 @@ module clkmgr import clkmgr_pkg::*; (
   // state readback
   assign hw2reg.clk_hints_status.clk_main_vec_dot_val.de = 1'b1;
   assign hw2reg.clk_hints_status.clk_main_vec_dot_val.d = clk_main_vec_dot_en;
+  assign hw2reg.clk_hints_status.clk_main_ddr_ctrl_val.de = 1'b1;
+  assign hw2reg.clk_hints_status.clk_main_ddr_ctrl_val.d = clk_main_ddr_ctrl_en;
   assign hw2reg.clk_hints_status.clk_main_aes_val.de = 1'b1;
   assign hw2reg.clk_hints_status.clk_main_aes_val.d = clk_main_aes_en;
   assign hw2reg.clk_hints_status.clk_main_hmac_val.de = 1'b1;

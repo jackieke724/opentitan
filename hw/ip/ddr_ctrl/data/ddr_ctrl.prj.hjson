@@ -1,0 +1,21 @@
+// Copyright lowRISC contributors.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+
+{
+    name:               "ddr_ctrl",
+    design_spec:        "hw/ip/ddr_ctrl/doc",
+    dv_doc:             "hw/ip/ddr_ctrl/doc/dv",
+    hw_checklist:       "hw/ip/ddr_ctrl/doc/checklist",
+    sw_checklist:       "sw/device/lib/dif/dif_ddr_ctrl",
+    revisions: [
+      {
+        version:            "0.1",
+        life_stage:         "L0",
+        design_stage:       "D0",
+        verification_stage: "V0",
+        commit_id:          "",
+        notes:              ""
+      }
+    ]
+}

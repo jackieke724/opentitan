@@ -29,6 +29,10 @@ filesets:
       - util/vivado_hook_synth_design_pre.tcl: { file_type: user, copyto: vivado_hook_synth_design_pre.tcl }
       - util/vivado_hook_write_bitstream_pre.tcl: { file_type: user, copyto: vivado_hook_write_bitstream_pre.tcl }
       - util/vivado_hook_opt_design_post.tcl: { file_type: user, copyto: vivado_hook_opt_design_post.tcl }
+      - util/vivado_gen_ip.tcl: { file_type: user, copyto: vivado_gen_ip.tcl }
+      - util/vivado_mig7.prj: { file_type: user, copyto: vivado_mig7.prj }
+      - util/vivado_ddrif_fifo_u2h.tcl: { file_type: user, copyto: vivado_ddrif_fifo_u2h.tcl }
+      - util/vivado_ddrif_fifo_h2u.tcl: { file_type: user, copyto: vivado_ddrif_fifo_h2u.tcl }
 
 parameters:
   # XXX: This parameter needs to be absolute, or relative to the *.runs/synth_1

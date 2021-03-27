@@ -58,6 +58,7 @@ module top_earlgrey #(
   input  logic       clk_io_i,
   input  logic       clk_usb_i,
   input  logic       clk_aon_i,
+  input  logic       clk_ddr_i,
   input  rstmgr_pkg::rstmgr_ast_t       rstmgr_ast_i,
   output pwrmgr_pkg::pwr_ast_req_t       pwrmgr_pwr_ast_req_o,
   input  pwrmgr_pkg::pwr_ast_rsp_t       pwrmgr_pwr_ast_rsp_i,
@@ -74,6 +75,8 @@ module top_earlgrey #(
   input  logic       flash_power_ready_h_i,
   input  logic [1:0] flash_test_mode_a_i,
   input  logic       flash_test_voltage_h_i,
+  output ddr_ctrl_pkg::mig_pins_out_t       ddr_ctrl_mig_pins_out_o,
+  inout ddr_ctrl_pkg::mig_pins_inout_t       ddr_ctrl_mig_pins_inout_o,
   output clkmgr_pkg::clkmgr_ast_out_t       clks_ast_o,
   output rstmgr_pkg::rstmgr_ast_out_t       rsts_ast_o,
   input               scan_rst_ni, // reset used for test mode
@@ -120,6 +123,7 @@ module top_earlgrey #(
   logic        cio_spi_device_sdo_d2p;
   logic        cio_spi_device_sdo_en_d2p;
   // vec_dot
+  // ddr_ctrl
   // rv_timer
   // sensor_ctrl
   // otp_ctrl
@@ -283,7 +287,7 @@ module top_earlgrey #(
   keymgr_pkg::hw_key_req_t       keymgr_kmac_key;
   keymgr_pkg::kmac_data_req_t       keymgr_kmac_data_req;
   keymgr_pkg::kmac_data_rsp_t       keymgr_kmac_data_rsp;
-  logic [4:0] clkmgr_idle;
+  logic [5:0] clkmgr_idle;
   otp_ctrl_pkg::otp_lc_data_t       otp_ctrl_otp_lc_data;
   otp_ctrl_pkg::lc_otp_program_req_t       lc_ctrl_lc_otp_program_req;
   otp_ctrl_pkg::lc_otp_program_rsp_t       lc_ctrl_lc_otp_program_rsp;
@@ -342,6 +346,8 @@ module top_earlgrey #(
   tlul_pkg::tl_d2h_t       otbn_tl_rsp;
   tlul_pkg::tl_h2d_t       vec_dot_tl_req;
   tlul_pkg::tl_d2h_t       vec_dot_tl_rsp;
+  tlul_pkg::tl_h2d_t       ddr_ctrl_tl_req;
+  tlul_pkg::tl_d2h_t       ddr_ctrl_tl_rsp;
   tlul_pkg::tl_h2d_t       keymgr_tl_req;
   tlul_pkg::tl_d2h_t       keymgr_tl_rsp;
   tlul_pkg::tl_h2d_t       uart_tl_req;
@@ -795,6 +801,19 @@ module top_earlgrey #(
       .rst_ni (rstmgr_resets.rst_sys_n[rstmgr_pkg::Domain0Sel])
   );
 
+  ddr_ctrl u_ddr_ctrl (
+
+      // Inter-module signals
+      .mig_pins_out_o(ddr_ctrl_mig_pins_out_o),
+      .mig_pins_inout_o(ddr_ctrl_mig_pins_inout_o),
+      .idle_o(clkmgr_idle[1]),
+      .tl_i(ddr_ctrl_tl_req),
+      .tl_o(ddr_ctrl_tl_rsp),
+      .clk_i (clkmgr_clocks.clk_main_ddr_ctrl),
+      .clk_ddr_i (clkmgr_clocks.clk_ddr_ddr_ctrl),
+      .rst_ni (rstmgr_resets.rst_sys_n[rstmgr_pkg::Domain0Sel])
+  );
+
   rv_timer u_rv_timer (
 
       // Interrupt
@@ -988,6 +1007,7 @@ module top_earlgrey #(
       .clk_io_i(clk_io_i),
       .clk_usb_i(clk_usb_i),
       .clk_aon_i(clk_aon_i),
+      .clk_ddr_i(clk_ddr_i),
       .clocks_ast_o(clks_ast_o),
       .pwr_i(pwrmgr_pwr_clk_req),
       .pwr_o(pwrmgr_pwr_clk_rsp),
@@ -1177,7 +1197,7 @@ module top_earlgrey #(
       .alert_rx_i  ( alert_rx[12:11] ),
 
       // Inter-module signals
-      .idle_o(clkmgr_idle[1]),
+      .idle_o(clkmgr_idle[2]),
       .tl_i(aes_tl_req),
       .tl_o(aes_tl_rsp),
       .clk_i (clkmgr_clocks.clk_main_aes),
@@ -1192,7 +1212,7 @@ module top_earlgrey #(
       .intr_hmac_err_o   (intr_hmac_hmac_err),
 
       // Inter-module signals
-      .idle_o(clkmgr_idle[2]),
+      .idle_o(clkmgr_idle[3]),
       .tl_i(hmac_tl_req),
       .tl_o(hmac_tl_rsp),
       .clk_i (clkmgr_clocks.clk_main_hmac),
@@ -1215,7 +1235,7 @@ module top_earlgrey #(
       .keymgr_kdf_o(keymgr_kmac_data_rsp),
       .entropy_o(),
       .entropy_i(edn_pkg::EDN_RSP_DEFAULT),
-      .idle_o(clkmgr_idle[3]),
+      .idle_o(clkmgr_idle[4]),
       .tl_i(kmac_tl_req),
       .tl_o(kmac_tl_rsp),
       .clk_i (clkmgr_clocks.clk_main_kmac),
@@ -1405,7 +1425,7 @@ module top_earlgrey #(
       .alert_rx_i  ( alert_rx[17:16] ),
 
       // Inter-module signals
-      .idle_o(clkmgr_idle[4]),
+      .idle_o(clkmgr_idle[5]),
       .tl_i(otbn_tl_req),
       .tl_o(otbn_tl_rsp),
       .clk_i (clkmgr_clocks.clk_main_otbn),
@@ -1570,6 +1590,10 @@ module top_earlgrey #(
     // port: tl_vec_dot
     .tl_vec_dot_o(vec_dot_tl_req),
     .tl_vec_dot_i(vec_dot_tl_rsp),
+
+    // port: tl_ddr_ctrl
+    .tl_ddr_ctrl_o(ddr_ctrl_tl_req),
+    .tl_ddr_ctrl_i(ddr_ctrl_tl_rsp),
 
     // port: tl_keymgr
     .tl_keymgr_o(keymgr_tl_req),

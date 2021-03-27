@@ -71,6 +71,12 @@
       act:     "rcv",
       package: "",
     },
+    { struct:  "logic",
+      type:    "uni",
+      name:    "clk_ddr",
+      act:     "rcv",
+      package: "",
+    },
 
   // Exported clocks
     { struct:  "clkmgr_ast_out",
@@ -91,7 +97,7 @@
       name:    "idle",
       act:     "rcv",
       package: "",
-      width:   "5"
+      width:   "6"
     },
   ],
 
@@ -152,6 +158,15 @@
         }
         {
           bits: "1",
+          name: "CLK_MAIN_DDR_CTRL_HINT",
+          resval: 1,
+          desc: '''
+            0 CLK_MAIN_DDR_CTRL can be disabled.
+            1 CLK_MAIN_DDR_CTRL is enabled.
+          '''
+        }
+        {
+          bits: "2",
           name: "CLK_MAIN_AES_HINT",
           resval: 1,
           desc: '''
@@ -160,7 +175,7 @@
           '''
         }
         {
-          bits: "2",
+          bits: "3",
           name: "CLK_MAIN_HMAC_HINT",
           resval: 1,
           desc: '''
@@ -169,7 +184,7 @@
           '''
         }
         {
-          bits: "3",
+          bits: "4",
           name: "CLK_MAIN_KMAC_HINT",
           resval: 1,
           desc: '''
@@ -178,7 +193,7 @@
           '''
         }
         {
-          bits: "4",
+          bits: "5",
           name: "CLK_MAIN_OTBN_HINT",
           resval: 1,
           desc: '''
@@ -212,6 +227,15 @@
         }
         {
           bits: "1",
+          name: "CLK_MAIN_DDR_CTRL_VAL",
+          resval: 1,
+          desc: '''
+            0 CLK_MAIN_DDR_CTRL is disabled.
+            1 CLK_MAIN_DDR_CTRL is enabled.
+          '''
+        }
+        {
+          bits: "2",
           name: "CLK_MAIN_AES_VAL",
           resval: 1,
           desc: '''
@@ -220,7 +244,7 @@
           '''
         }
         {
-          bits: "2",
+          bits: "3",
           name: "CLK_MAIN_HMAC_VAL",
           resval: 1,
           desc: '''
@@ -229,7 +253,7 @@
           '''
         }
         {
-          bits: "3",
+          bits: "4",
           name: "CLK_MAIN_KMAC_VAL",
           resval: 1,
           desc: '''
@@ -238,7 +262,7 @@
           '''
         }
         {
-          bits: "4",
+          bits: "5",
           name: "CLK_MAIN_OTBN_VAL",
           resval: 1,
           desc: '''

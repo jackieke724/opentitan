@@ -1,0 +1,169 @@
+// Copyright lowRISC contributors.
+// Licensed under the Apache License, Version 2.0, see LICENSE for details.
+// SPDX-License-Identifier: Apache-2.0
+{ name: "ddr_ctrl"
+  clock_primary: "clk_i"
+  other_clock_list: [ "clk_ddr_i" ]
+  bus_device: "tlul"
+  bus_host: "none"
+  /*
+  available_output_list: [
+    { name: "ddr3_addr",
+      width: 15,
+      desc: "ddr3_addr"
+    }
+    { name: "ddr3_ba",
+      width: 3,
+      desc: "ddr3_ba"
+    }
+    { name: "ddr3_ras_n", desc: "ddr3_ras_n" }
+    { name: "ddr3_cas_n", desc: "ddr3_cas_n" }
+    { name: "ddr3_we_n", desc: "ddr3_we_n" }
+    { name: "ddr3_reset_n", desc: "ddr3_reset_n" }
+    { name: "ddr3_ck_p",
+      width: 1,
+      desc: "ddr3_ck_p"
+    }
+    { name: "ddr3_ck_n",
+      width: 1,
+      desc: "ddr3_ck_n"
+    }
+    { name: "ddr3_cke",
+      width: 1,
+      desc: "ddr3_cke"
+    }
+    { name: "ddr3_cs_n",
+      width: 1,
+      desc: "ddr3_cs_n"
+    }
+    { name: "ddr3_dm",
+      width: 4,
+      desc: "ddr3_dm"
+    }
+    { name: "ddr3_odt",
+      width: 1,
+      desc: "ddr3_odt"
+    }
+  ]
+  available_inout_list: [
+    { name: "ddr3_dq",
+      width: 32,
+      desc: "ddr3_dq"
+    }
+    { name: "ddr3_dqs_n",
+      width: 4,
+      desc: "ddr3_dqs_n"
+    }
+    { name: "ddr3_dqs_p",
+      width: 4,
+      desc: "ddr3_dqs_p"
+    }
+  ]
+  */
+  /*
+  interrupt_list: [
+    { name: "done"
+      desc: "Vector Dot Product has completed the operation"
+    }
+  ]
+  */
+  inter_signal_list: [
+    { struct:  "mig_pins_out",
+      type:    "uni",
+      name:    "mig_pins_out",
+      act:     "req",
+      package: "ddr_ctrl_pkg",
+    }
+    { struct:  "mig_pins_inout",
+      type:    "uni",
+      name:    "mig_pins_inout",
+      act:     "req",
+      package: "ddr_ctrl_pkg",
+    }
+    // TODO: CSRNG isn't committed yet, depends on assumed interface done for
+    // AES in https://github.com/lowRISC/opentitan/pull/2140.
+    /*{ name:    "entropy",
+      type:    "req_rsp",
+      act:     "req",
+      package: "csrng_pkg",
+      struct:  "csrng_entropy",
+      width:   "1"
+    },*/
+
+    // Vector Dot Product is not performing any operation and can be clock/power-gated.
+    { name:    "idle",
+      type:    "uni",
+      struct:  "logic",
+      width:   "1",
+      act:     "req",
+    }
+  ]
+
+  regwidth: "32"
+  registers: [
+    { name: "INIT_CALIB_COMPLETE"
+      desc: "init_calib_complete",
+      swaccess: "ro",
+      hwaccess: "hwo",
+      fields: [
+        { bits: "0"}
+      ]
+    }
+    
+    { name: "DDRS_MOSI_U",
+      desc: "ddrs_mosi 63:32",
+      swaccess: "wo",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0" }
+      ]
+    }
+    { name: "DDRS_MOSI_L",
+      desc: "ddrs_mosi 31:0",
+      swaccess: "wo",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0" }
+      ]
+    }
+    { name: "DDRS_MOSI_VALID"
+      desc: "ddrs_mosi_valid",
+      swaccess: "r0w1c",
+      hwaccess: "hro",
+      hwqe:  "true",
+      fields: [
+        { bits: "0"
+          //name: "start"
+        }
+      ]
+    }
+    
+    { name: "DDRS_MISO_U",
+      desc: "ddrs_miso 63:32",
+      swaccess: "ro",
+      hwaccess: "hwo",
+      fields: [
+        { bits: "31:0" }
+      ]
+    }
+    { name: "DDRS_MISO_L",
+      desc: "ddrs_miso 31:0",
+      swaccess: "ro",
+      hwaccess: "hwo",
+      fields: [
+        { bits: "31:0" }
+      ]
+    }
+    { name: "DDRS_MISO_VALID"
+      desc: "ddrs_miso_valid",
+      swaccess: "rw",
+      hwaccess: "hwo",
+      fields: [
+        { bits: "0"
+          //name: "start"
+        }
+      ]
+    }
+
+  ]
+}

@@ -11,6 +11,25 @@ module top_earlgrey_nexysvideo #(
 	input               SYSCLK_N,
 	input               SYSCLK_P,
   input               IO_RST_N,
+  
+  // DDR3 interface
+  // Inouts
+  output [14:0]        ddr3_addr,
+  output [2:0]         ddr3_ba,
+  output               ddr3_ras_n,
+  output               ddr3_cas_n,
+  output               ddr3_we_n,
+  output               ddr3_reset_n,
+  output [0:0]         ddr3_ck_p,
+  output [0:0]         ddr3_ck_n,
+  output [0:0]         ddr3_cke,
+  output [0:0]         ddr3_cs_n,
+  output [3:0]         ddr3_dm,
+  output [0:0]         ddr3_odt,
+  inout [31:0]        ddr3_dq,
+  inout [3:0]         ddr3_dqs_n,
+  inout [3:0]         ddr3_dqs_p,
+   
   // JTAG interface
   inout               IO_DPS0, // IO_JTCK,    IO_SDCK
   inout               IO_DPS3, // IO_JTMS,    IO_SDCSB
@@ -335,6 +354,7 @@ module top_earlgrey_nexysvideo #(
     .clk_io_i        ( clk_main      ),
     .clk_usb_i       ( clk_usb_48mhz ),
     .clk_aon_i       ( clk_main      ),
+    .clk_ddr_i       ( IO_CLK        ),
     .rstmgr_ast_i                 ( ast_base_rst    ),
     .pwrmgr_pwr_ast_req_o         (                 ),
     .pwrmgr_pwr_ast_rsp_i         ( ast_base_pwr    ),
@@ -349,6 +369,23 @@ module top_earlgrey_nexysvideo #(
     .otp_ctrl_otp_ast_pwr_seq_h_i ( '0              ),
     .flash_power_down_h_i         ( '0              ),
     .flash_power_ready_h_i        ( 1'b1            ),
+    //.ddr_ctrl_sys_clk_p_i         ( SYSCLK_P        ),
+    //.ddr_ctrl_sys_clk_n_i         ( SYSCLK_N        ),
+    .ddr_ctrl_mig_pins_out_o      ({ ddr3_addr,
+                                     ddr3_ba,
+                                     ddr3_ras_n,
+                                     ddr3_cas_n,
+                                     ddr3_we_n,
+                                     ddr3_reset_n,
+                                     ddr3_ck_p,
+                                     ddr3_ck_n,
+                                     ddr3_cke,
+                                     ddr3_cs_n,
+                                     ddr3_dm,
+                                     ddr3_odt}      ),
+    .ddr_ctrl_mig_pins_inout_o    ({ ddr3_dq,
+                                     ddr3_dqs_n,
+                                     ddr3_dqs_p}    ),
 
     // JTAG
     .jtag_tck_i      ( jtag_tck_buf  ),

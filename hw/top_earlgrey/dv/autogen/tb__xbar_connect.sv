@@ -52,6 +52,7 @@ tl_if alert_handler_tl_if(clk_main, rst_n);
 tl_if nmi_gen_tl_if(clk_main, rst_n);
 tl_if otbn_tl_if(clk_main, rst_n);
 tl_if vec_dot_tl_if(clk_main, rst_n);
+tl_if ddr_ctrl_tl_if(clk_main, rst_n);
 tl_if keymgr_tl_if(clk_main, rst_n);
 tl_if uart_tl_if(clk_io_div4, rst_n);
 tl_if gpio_tl_if(clk_io_div4, rst_n);
@@ -113,6 +114,7 @@ initial begin
     `DRIVE_CHIP_TL_DEVICE_IF(nmi_gen, nmi_gen, tl)
     `DRIVE_CHIP_TL_DEVICE_IF(otbn, otbn, tl)
     `DRIVE_CHIP_TL_DEVICE_IF(vec_dot, vec_dot, tl)
+    `DRIVE_CHIP_TL_DEVICE_IF(ddr_ctrl, ddr_ctrl, tl)
     `DRIVE_CHIP_TL_DEVICE_IF(keymgr, keymgr, tl)
     `DRIVE_CHIP_TL_DEVICE_IF(uart, uart, tl)
     `DRIVE_CHIP_TL_DEVICE_IF(gpio, gpio, tl)

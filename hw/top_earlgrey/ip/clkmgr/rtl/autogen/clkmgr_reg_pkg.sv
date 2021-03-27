@@ -27,6 +27,9 @@ package clkmgr_reg_pkg;
     } clk_main_vec_dot_hint;
     struct packed {
       logic        q;
+    } clk_main_ddr_ctrl_hint;
+    struct packed {
+      logic        q;
     } clk_main_aes_hint;
     struct packed {
       logic        q;
@@ -45,6 +48,10 @@ package clkmgr_reg_pkg;
       logic        d;
       logic        de;
     } clk_main_vec_dot_val;
+    struct packed {
+      logic        d;
+      logic        de;
+    } clk_main_ddr_ctrl_val;
     struct packed {
       logic        d;
       logic        de;
@@ -68,15 +75,15 @@ package clkmgr_reg_pkg;
   // Register to internal design logic //
   ///////////////////////////////////////
   typedef struct packed {
-    clkmgr_reg2hw_clk_enables_reg_t clk_enables; // [6:5]
-    clkmgr_reg2hw_clk_hints_reg_t clk_hints; // [4:0]
+    clkmgr_reg2hw_clk_enables_reg_t clk_enables; // [7:6]
+    clkmgr_reg2hw_clk_hints_reg_t clk_hints; // [5:0]
   } clkmgr_reg2hw_t;
 
   ///////////////////////////////////////
   // Internal design logic to register //
   ///////////////////////////////////////
   typedef struct packed {
-    clkmgr_hw2reg_clk_hints_status_reg_t clk_hints_status; // [9:0]
+    clkmgr_hw2reg_clk_hints_status_reg_t clk_hints_status; // [11:0]
   } clkmgr_hw2reg_t;
 
   // Register Address

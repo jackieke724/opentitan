@@ -59,6 +59,7 @@
       keymgr
       kmac
       vec_dot
+      ddr_ctrl
     ]
     dm_sba:
     [
@@ -81,6 +82,7 @@
       otbn
       kmac
       vec_dot
+      ddr_ctrl
     ]
   }
   nodes:
@@ -481,6 +483,24 @@
         {
           base_addr: 0x40060000
           size_byte: 0x10000
+        }
+      ]
+      xbar: false
+      stub: false
+      pipeline: "true"
+    }
+    {
+      name: ddr_ctrl
+      type: device
+      clock: clk_main_i
+      reset: rst_main_ni
+      pipeline_byp: "false"
+      inst_type: ddr_ctrl
+      addr_range:
+      [
+        {
+          base_addr: 0x40070000
+          size_byte: 0x1000
         }
       ]
       xbar: false

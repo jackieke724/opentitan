@@ -39,6 +39,7 @@ IPS ?= aes           \
        uart          \
        usbdev        \
        vec_dot       \
+       ddr_ctrl      \
        usbuart
 
 TOPS ?= top_earlgrey

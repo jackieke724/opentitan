@@ -146,6 +146,12 @@ module xbar_main_bind;
     .h2d    (tl_vec_dot_o),
     .d2h    (tl_vec_dot_i)
   );
+  bind xbar_main tlul_assert #(.EndpointType("Host")) tlul_assert_device_ddr_ctrl (
+    .clk_i  (clk_main_i),
+    .rst_ni (rst_main_ni),
+    .h2d    (tl_ddr_ctrl_o),
+    .d2h    (tl_ddr_ctrl_i)
+  );
   bind xbar_main tlul_assert #(.EndpointType("Host")) tlul_assert_device_keymgr (
     .clk_i  (clk_main_i),
     .rst_ni (rst_main_ni),

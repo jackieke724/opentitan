@@ -30,6 +30,20 @@ sw_lib_dif_vec_dot = declare_dependency(
   )
 )
 
+# DDR3 Controller DIF library (dif_ddr_ctrl)
+sw_lib_dif_ddr_ctrl = declare_dependency(
+  link_with: static_library(
+    'dif_ddr_ctrl_ot',
+    sources: [
+      hw_ip_ddr_ctrl_reg_h,
+      'dif_ddr_ctrl.c',
+    ],
+    dependencies: [
+      sw_lib_mmio,
+    ],
+  )
+)
+
 # UART DIF library (dif_uart)
 sw_lib_dif_uart = declare_dependency(
   link_with: static_library(

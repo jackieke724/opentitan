@@ -64,6 +64,9 @@ tl_device_t xbar_devices[$] = '{
     '{"vec_dot", '{
         '{32'h40060000, 32'h4006ffff}
     }},
+    '{"ddr_ctrl", '{
+        '{32'h40070000, 32'h40070fff}
+    }},
     '{"keymgr", '{
         '{32'h41130000, 32'h41130fff}
     }},
@@ -148,7 +151,8 @@ tl_host_t xbar_hosts[$] = '{
         "otbn",
         "keymgr",
         "kmac",
-        "vec_dot"}}
+        "vec_dot",
+        "ddr_ctrl"}}
     ,
     '{"dm_sba", 2, '{
         "rom",
@@ -181,5 +185,6 @@ tl_host_t xbar_hosts[$] = '{
         "nmi_gen",
         "otbn",
         "kmac",
-        "vec_dot"}}
+        "vec_dot",
+        "ddr_ctrl"}}
 };

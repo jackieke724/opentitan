@@ -98,6 +98,24 @@ extern "C" {
 #define TOP_EARLGREY_VEC_DOT_SIZE_BYTES 0x10000u
 
 /**
+ * Peripheral base address for ddr_ctrl in top earlgrey.
+ *
+ * This should be used with #mmio_region_from_addr to access the memory-mapped
+ * registers associated with the peripheral (usually via a DIF).
+ */
+#define TOP_EARLGREY_DDR_CTRL_BASE_ADDR 0x40070000u
+
+/**
+ * Peripheral size for ddr_ctrl in top earlgrey.
+ *
+ * This is the size (in bytes) of the peripheral's reserved memory area. All
+ * memory-mapped registers associated with this peripheral should have an
+ * address between #TOP_EARLGREY_DDR_CTRL_BASE_ADDR and
+ * `TOP_EARLGREY_DDR_CTRL_BASE_ADDR + TOP_EARLGREY_DDR_CTRL_SIZE_BYTES`.
+ */
+#define TOP_EARLGREY_DDR_CTRL_SIZE_BYTES 0x1000u
+
+/**
  * Peripheral base address for rv_timer in top earlgrey.
  *
  * This should be used with #mmio_region_from_addr to access the memory-mapped
@@ -962,11 +980,12 @@ typedef enum top_earlgrey_gateable_clocks {
  */
 typedef enum top_earlgrey_hintable_clocks {
   kTopEarlgreyHintableClocksMainVecDot = 0, /**< Clock clk_main_vec_dot in group trans */
-  kTopEarlgreyHintableClocksMainAes = 1, /**< Clock clk_main_aes in group trans */
-  kTopEarlgreyHintableClocksMainHmac = 2, /**< Clock clk_main_hmac in group trans */
-  kTopEarlgreyHintableClocksMainKmac = 3, /**< Clock clk_main_kmac in group trans */
-  kTopEarlgreyHintableClocksMainOtbn = 4, /**< Clock clk_main_otbn in group trans */
-  kTopEarlgreyHintableClocksLast = 4, /**< \internal Last Valid Hintable Clock */
+  kTopEarlgreyHintableClocksMainDdrCtrl = 1, /**< Clock clk_main_ddr_ctrl in group trans */
+  kTopEarlgreyHintableClocksMainAes = 2, /**< Clock clk_main_aes in group trans */
+  kTopEarlgreyHintableClocksMainHmac = 3, /**< Clock clk_main_hmac in group trans */
+  kTopEarlgreyHintableClocksMainKmac = 4, /**< Clock clk_main_kmac in group trans */
+  kTopEarlgreyHintableClocksMainOtbn = 5, /**< Clock clk_main_otbn in group trans */
+  kTopEarlgreyHintableClocksLast = 5, /**< \internal Last Valid Hintable Clock */
 } top_earlgrey_hintable_clocks_t;
 
 // Header Extern Guard
