@@ -1,0 +1,1 @@
+source vivado_axi_chip2chip_host.tcl

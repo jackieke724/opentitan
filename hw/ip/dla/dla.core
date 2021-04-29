@@ -11,6 +11,8 @@ filesets:
       - lowrisc:ip:tlul
     files:
       - rtl/INC_global.v: {is_include_file: true}
+      - rtl/chip_host.sv
+      - rtl/tlul2axi4_host.sv
       - rtl/async_fifo.v
       - rtl/dla_reg_pkg.sv
       - rtl/dla_reg_top.sv

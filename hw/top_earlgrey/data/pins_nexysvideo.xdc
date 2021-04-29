@@ -50,12 +50,12 @@ set_property -dict { PACKAGE_PIN R19   IOSTANDARD LVCMOS33 } [get_ports { IO_RST
 
 
 ## Switches
-set_property -dict { PACKAGE_PIN G19   IOSTANDARD LVCMOS12 } [get_ports { IO_GP0 }]; #IO_L22P_T3_16 Sch=sw[0]
-set_property -dict { PACKAGE_PIN G25   IOSTANDARD LVCMOS12 } [get_ports { IO_GP1 }]; #IO_25_16 Sch=sw[1]
-set_property -dict { PACKAGE_PIN H24   IOSTANDARD LVCMOS12 } [get_ports { IO_GP2 }]; #IO_L24P_T3_16 Sch=sw[2]
-set_property -dict { PACKAGE_PIN K19   IOSTANDARD LVCMOS12 } [get_ports { IO_GP3 }]; #IO_L24N_T3_16 Sch=sw[3]
-set_property -dict { PACKAGE_PIN N19   IOSTANDARD LVCMOS12 } [get_ports { IO_GP4 }]; #IO_L6P_T0_15 Sch=sw[4]
-set_property -dict { PACKAGE_PIN P19   IOSTANDARD LVCMOS12 } [get_ports { IO_GP5 }]; #IO_0_15 Sch=sw[5]
+set_property -dict { PACKAGE_PIN G19   IOSTANDARD LVCMOS33 } [get_ports { IO_GP0 }]; #IO_L22P_T3_16 Sch=sw[0]
+set_property -dict { PACKAGE_PIN G25   IOSTANDARD LVCMOS33 } [get_ports { IO_GP1 }]; #IO_25_16 Sch=sw[1]
+set_property -dict { PACKAGE_PIN H24   IOSTANDARD LVCMOS33 } [get_ports { IO_GP2 }]; #IO_L24P_T3_16 Sch=sw[2]
+set_property -dict { PACKAGE_PIN K19   IOSTANDARD LVCMOS33 } [get_ports { IO_GP3 }]; #IO_L24N_T3_16 Sch=sw[3]
+set_property -dict { PACKAGE_PIN N19   IOSTANDARD LVCMOS33 } [get_ports { IO_GP4 }]; #IO_L6P_T0_15 Sch=sw[4]
+set_property -dict { PACKAGE_PIN P19   IOSTANDARD LVCMOS33 } [get_ports { IO_GP5 }]; #IO_0_15 Sch=sw[5]
 set_property -dict { PACKAGE_PIN P26   IOSTANDARD LVCMOS33 } [get_ports { IO_GP6 }]; #IO_L19P_T3_A22_15 Sch=sw[6]
 set_property -dict { PACKAGE_PIN P27   IOSTANDARD LVCMOS33 } [get_ports { IO_GP7 }]; #IO_25_15 Sch=sw[7]
 

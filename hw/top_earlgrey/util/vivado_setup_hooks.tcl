@@ -21,3 +21,6 @@ set_property STEPS.SYNTH_DESIGN.TCL.PRE "${workroot}/vivado_hook_synth_design_pr
 
 # As workaround, we use the post route design hook, which gets called.
 set_property STEPS.ROUTE_DESIGN.TCL.POST "${workroot}/vivado_hook_write_bitstream_pre.tcl" [get_runs impl_1]
+
+#add chip2chip IP
+source vivado_gen_ip.tcl
