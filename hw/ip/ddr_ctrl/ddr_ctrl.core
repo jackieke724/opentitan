@@ -17,6 +17,7 @@ filesets:
       - rtl/ddrif.v
       - rtl/ddrif_dla.v
       - rtl/ddrif_ui.v
+      - rtl/ddr_ctrl_rxf_ctrl.sv
     file_type: systemVerilogSource
 
   files_verilator_waiver:

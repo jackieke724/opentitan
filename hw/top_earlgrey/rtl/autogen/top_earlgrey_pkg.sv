@@ -59,7 +59,7 @@ package top_earlgrey_pkg;
   /**
    * Peripheral size in bytes for ddr_ctrl in top earlgrey.
    */
-  parameter int unsigned TOP_EARLGREY_DDR_CTRL_SIZE_BYTES = 32'h1000;
+  parameter int unsigned TOP_EARLGREY_DDR_CTRL_SIZE_BYTES = 32'h10000;
 
   /**
    * Peripheral base address for rv_timer in top earlgrey.

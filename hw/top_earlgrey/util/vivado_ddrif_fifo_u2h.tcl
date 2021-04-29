@@ -66,9 +66,9 @@ set ddrif_fifo_u2h [create_ip -name fifo_generator -vendor xilinx.com -library i
 set_property -dict { 
   CONFIG.Fifo_Implementation {Independent_Clocks_Block_RAM}
   CONFIG.Performance_Options {Standard_FIFO}
-  CONFIG.Input_Data_Width {512}
+  CONFIG.Input_Data_Width {256}
   CONFIG.Input_Depth {256}
-  CONFIG.Output_Data_Width {512}
+  CONFIG.Output_Data_Width {256}
   CONFIG.Output_Depth {256}
   CONFIG.Reset_Pin {false}
   CONFIG.Reset_Type {Asynchronous_Reset}

@@ -13,6 +13,11 @@ module ddr_ctrl_reg_top (
   // Below Regster interface can be changed
   input  tlul_pkg::tl_h2d_t tl_i,
   output tlul_pkg::tl_d2h_t tl_o,
+
+  // Output port for window
+  output tlul_pkg::tl_h2d_t tl_win_o  [1],
+  input  tlul_pkg::tl_d2h_t tl_win_i  [1],
+
   // To HW
   output ddr_ctrl_reg_pkg::ddr_ctrl_reg2hw_t reg2hw, // Write
   input  ddr_ctrl_reg_pkg::ddr_ctrl_hw2reg_t hw2reg, // Read
@@ -23,7 +28,7 @@ module ddr_ctrl_reg_top (
 
   import ddr_ctrl_reg_pkg::* ;
 
-  localparam int AW = 5;
+  localparam int AW = 16;
   localparam int DW = 32;
   localparam int DBW = DW/8;                    // Byte Width
 
@@ -43,8 +48,48 @@ module ddr_ctrl_reg_top (
   tlul_pkg::tl_h2d_t tl_reg_h2d;
   tlul_pkg::tl_d2h_t tl_reg_d2h;
 
-  assign tl_reg_h2d = tl_i;
-  assign tl_o       = tl_reg_d2h;
+  tlul_pkg::tl_h2d_t tl_socket_h2d [2];
+  tlul_pkg::tl_d2h_t tl_socket_d2h [2];
+
+  logic [1:0] reg_steer;
+
+  // socket_1n connection
+  assign tl_reg_h2d = tl_socket_h2d[1];
+  assign tl_socket_d2h[1] = tl_reg_d2h;
+
+  assign tl_win_o[0] = tl_socket_h2d[0];
+  assign tl_socket_d2h[0] = tl_win_i[0];
+
+  // Create Socket_1n
+  tlul_socket_1n #(
+    .N          (2),
+    .HReqPass   (1'b1),
+    .HRspPass   (1'b1),
+    .DReqPass   ({2{1'b1}}),
+    .DRspPass   ({2{1'b1}}),
+    .HReqDepth  (4'h0),
+    .HRspDepth  (4'h0),
+    .DReqDepth  ({2{4'h0}}),
+    .DRspDepth  ({2{4'h0}})
+  ) u_socket (
+    .clk_i,
+    .rst_ni,
+    .tl_h_i (tl_i),
+    .tl_h_o (tl_o),
+    .tl_d_o (tl_socket_h2d),
+    .tl_d_i (tl_socket_d2h),
+    .dev_select_i (reg_steer)
+  );
+
+  // Create steering logic
+  always_comb begin
+    reg_steer = 1;       // Default set to register
+
+    // TODO: Can below codes be unique case () inside ?
+    if (tl_i.a_address[AW-1:0] >= 32768 && tl_i.a_address[AW-1:0] < 36864) begin
+      reg_steer = 0;
+    end
+  end
 
   tlul_adapter_reg #(
     .RegAw(AW),
@@ -83,6 +128,15 @@ module ddr_ctrl_reg_top (
   logic ddrs_miso_valid_qs;
   logic ddrs_miso_valid_wd;
   logic ddrs_miso_valid_we;
+  logic [15:0] rxf_ctrl_wptr_qs;
+  logic [15:0] rxf_ctrl_wptr_wd;
+  logic rxf_ctrl_wptr_we;
+  logic [15:0] rxf_ctrl_rptr_qs;
+  logic [15:0] rxf_ctrl_rptr_wd;
+  logic rxf_ctrl_rptr_we;
+  logic cpu_rd_qs;
+  logic cpu_rd_wd;
+  logic cpu_rd_we;
 
   // Register instances
   // R[init_calib_complete]: V(False)
@@ -268,9 +322,90 @@ module ddr_ctrl_reg_top (
   );
 
 
+  // R[rxf_ctrl]: V(False)
+
+  //   F[wptr]: 15:0
+  prim_subreg #(
+    .DW      (16),
+    .SWACCESS("RW"),
+    .RESVAL  (16'h0)
+  ) u_rxf_ctrl_wptr (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (rxf_ctrl_wptr_we),
+    .wd     (rxf_ctrl_wptr_wd),
+
+    // from internal hardware
+    .de     (hw2reg.rxf_ctrl.wptr.de),
+    .d      (hw2reg.rxf_ctrl.wptr.d ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (),
+
+    // to register interface (read)
+    .qs     (rxf_ctrl_wptr_qs)
+  );
 
 
-  logic [6:0] addr_hit;
+  //   F[rptr]: 31:16
+  prim_subreg #(
+    .DW      (16),
+    .SWACCESS("RW"),
+    .RESVAL  (16'h0)
+  ) u_rxf_ctrl_rptr (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (rxf_ctrl_rptr_we),
+    .wd     (rxf_ctrl_rptr_wd),
+
+    // from internal hardware
+    .de     (hw2reg.rxf_ctrl.rptr.de),
+    .d      (hw2reg.rxf_ctrl.rptr.d ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (),
+
+    // to register interface (read)
+    .qs     (rxf_ctrl_rptr_qs)
+  );
+
+
+  // R[cpu_rd]: V(False)
+
+  prim_subreg #(
+    .DW      (1),
+    .SWACCESS("RW"),
+    .RESVAL  (1'h0)
+  ) u_cpu_rd (
+    .clk_i   (clk_i    ),
+    .rst_ni  (rst_ni  ),
+
+    // from register interface
+    .we     (cpu_rd_we),
+    .wd     (cpu_rd_wd),
+
+    // from internal hardware
+    .de     (1'b0),
+    .d      ('0  ),
+
+    // to internal hardware
+    .qe     (),
+    .q      (reg2hw.cpu_rd.q ),
+
+    // to register interface (read)
+    .qs     (cpu_rd_qs)
+  );
+
+
+
+
+  logic [8:0] addr_hit;
   always_comb begin
     addr_hit = '0;
     addr_hit[0] = (reg_addr == DDR_CTRL_INIT_CALIB_COMPLETE_OFFSET);
@@ -280,6 +415,8 @@ module ddr_ctrl_reg_top (
     addr_hit[4] = (reg_addr == DDR_CTRL_DDRS_MISO_U_OFFSET);
     addr_hit[5] = (reg_addr == DDR_CTRL_DDRS_MISO_L_OFFSET);
     addr_hit[6] = (reg_addr == DDR_CTRL_DDRS_MISO_VALID_OFFSET);
+    addr_hit[7] = (reg_addr == DDR_CTRL_RXF_CTRL_OFFSET);
+    addr_hit[8] = (reg_addr == DDR_CTRL_CPU_RD_OFFSET);
   end
 
   assign addrmiss = (reg_re || reg_we) ? ~|addr_hit : 1'b0 ;
@@ -294,6 +431,8 @@ module ddr_ctrl_reg_top (
     if (addr_hit[4] && reg_we && (DDR_CTRL_PERMIT[4] != (DDR_CTRL_PERMIT[4] & reg_be))) wr_err = 1'b1 ;
     if (addr_hit[5] && reg_we && (DDR_CTRL_PERMIT[5] != (DDR_CTRL_PERMIT[5] & reg_be))) wr_err = 1'b1 ;
     if (addr_hit[6] && reg_we && (DDR_CTRL_PERMIT[6] != (DDR_CTRL_PERMIT[6] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[7] && reg_we && (DDR_CTRL_PERMIT[7] != (DDR_CTRL_PERMIT[7] & reg_be))) wr_err = 1'b1 ;
+    if (addr_hit[8] && reg_we && (DDR_CTRL_PERMIT[8] != (DDR_CTRL_PERMIT[8] & reg_be))) wr_err = 1'b1 ;
   end
 
 
@@ -310,6 +449,15 @@ module ddr_ctrl_reg_top (
 
   assign ddrs_miso_valid_we = addr_hit[6] & reg_we & ~wr_err;
   assign ddrs_miso_valid_wd = reg_wdata[0];
+
+  assign rxf_ctrl_wptr_we = addr_hit[7] & reg_we & ~wr_err;
+  assign rxf_ctrl_wptr_wd = reg_wdata[15:0];
+
+  assign rxf_ctrl_rptr_we = addr_hit[7] & reg_we & ~wr_err;
+  assign rxf_ctrl_rptr_wd = reg_wdata[31:16];
+
+  assign cpu_rd_we = addr_hit[8] & reg_we & ~wr_err;
+  assign cpu_rd_wd = reg_wdata[0];
 
   // Read data return
   always_comb begin
@@ -341,6 +489,15 @@ module ddr_ctrl_reg_top (
 
       addr_hit[6]: begin
         reg_rdata_next[0] = ddrs_miso_valid_qs;
+      end
+
+      addr_hit[7]: begin
+        reg_rdata_next[15:0] = rxf_ctrl_wptr_qs;
+        reg_rdata_next[31:16] = rxf_ctrl_rptr_qs;
+      end
+
+      addr_hit[8]: begin
+        reg_rdata_next[0] = cpu_rd_qs;
       end
 
       default: begin

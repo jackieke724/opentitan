@@ -831,7 +831,7 @@
         clk_ddr_i: clkmgr_clocks.clk_ddr_ddr_ctrl
       }
       domain: "0"
-      size: 0x1000
+      size: 0x10000
       bus_device: tlul
       bus_host: none
       available_input_list: []
@@ -6035,7 +6035,7 @@
           [
             {
               base_addr: 0x40070000
-              size_byte: 0x1000
+              size_byte: 0x10000
             }
           ]
           xbar: false

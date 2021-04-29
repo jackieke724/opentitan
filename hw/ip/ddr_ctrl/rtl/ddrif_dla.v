@@ -176,7 +176,7 @@ module ddrif_dla #(
                     miso_rdata <= u2d_rdata;
                 end
                 else begin
-                    miso_rdata <= u2d_rdata >> DLA_DW;
+                    miso_rdata <= miso_rdata >> DLA_DW;
                 end
             end
         end

@@ -164,6 +164,47 @@
         }
       ]
     }
+    
+    { name: "RXF_CTRL",
+      desc: "ddr data receive fifo ctrl",
+      swaccess: "rw",
+      hwaccess: "hwo",
+      fields: [
+        { bits: "31:16"
+          name: "rptr",
+          desc: "software read pointer"
+        }
+        { bits: "15:0"
+          name: "wptr",
+          desc: "hardware write pointer"
+        }
+      ]
+    }
+    { name: "CPU_RD"
+      desc: "cpu_rd",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "0"
+          //name: "start"
+        }
+      ]
+    }
+    
+    { skipto: "0x8000" }
+
+    // Dmem size (given as `items` below) must be a power of two.
+    { window: {
+        name: "DMEM"
+        items: "1024" // 4 kB
+        swaccess: "rw",
+        byte-write: "false",
+        desc: '''
+          Data Memory.
+
+        '''
+      }
+    }
 
   ]
 }

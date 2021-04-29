@@ -131,7 +131,8 @@ dif_ddr_ctrl_result_t dif_ddr_ctrl_init(dif_ddr_ctrl_params_t params,
 //dif_ddr_ctrl_result_t dif_ddr_ctrl_reset(const dif_ddr_ctrl_t *ddr_ctrl);
 dif_ddr_ctrl_result_t dif_ddr_ctrl_init_calib(const dif_ddr_ctrl_t *ddr_ctrl);
 dif_ddr_ctrl_result_t dif_ddr_ctrl_write(const dif_ddr_ctrl_t *ddr_ctrl, uint32_t data_u, uint32_t data_l);
-dif_ddr_ctrl_result_t dif_ddr_ctrl_read(const dif_ddr_ctrl_t *ddr_ctrl, uint32_t* data_u, uint32_t* data_l);
+dif_ddr_ctrl_result_t dif_ddr_ctrl_write_buf(const dif_ddr_ctrl_t *ddr_ctrl, uint32_t ddr_start_addr, void *src, size_t len_bytes);
+dif_ddr_ctrl_result_t dif_ddr_ctrl_read(const dif_ddr_ctrl_t *ddr_ctrl, uint32_t ddr_start_addr, uint32_t* data_u, uint32_t* data_l,void *dest, size_t len_bytes, uint32_t* wptr);
 
 /**
  * Configures DDR CONTROLLER with runtime information.

@@ -22,6 +22,10 @@ package ddr_ctrl_reg_pkg;
     logic        qe;
   } ddr_ctrl_reg2hw_ddrs_mosi_valid_reg_t;
 
+  typedef struct packed {
+    logic        q;
+  } ddr_ctrl_reg2hw_cpu_rd_reg_t;
+
 
   typedef struct packed {
     logic        d;
@@ -43,35 +47,53 @@ package ddr_ctrl_reg_pkg;
     logic        de;
   } ddr_ctrl_hw2reg_ddrs_miso_valid_reg_t;
 
+  typedef struct packed {
+    struct packed {
+      logic [15:0] d;
+      logic        de;
+    } wptr;
+    struct packed {
+      logic [15:0] d;
+      logic        de;
+    } rptr;
+  } ddr_ctrl_hw2reg_rxf_ctrl_reg_t;
+
 
   ///////////////////////////////////////
   // Register to internal design logic //
   ///////////////////////////////////////
   typedef struct packed {
-    ddr_ctrl_reg2hw_ddrs_mosi_u_reg_t ddrs_mosi_u; // [65:34]
-    ddr_ctrl_reg2hw_ddrs_mosi_l_reg_t ddrs_mosi_l; // [33:2]
-    ddr_ctrl_reg2hw_ddrs_mosi_valid_reg_t ddrs_mosi_valid; // [1:0]
+    ddr_ctrl_reg2hw_ddrs_mosi_u_reg_t ddrs_mosi_u; // [66:35]
+    ddr_ctrl_reg2hw_ddrs_mosi_l_reg_t ddrs_mosi_l; // [34:3]
+    ddr_ctrl_reg2hw_ddrs_mosi_valid_reg_t ddrs_mosi_valid; // [2:1]
+    ddr_ctrl_reg2hw_cpu_rd_reg_t cpu_rd; // [0:0]
   } ddr_ctrl_reg2hw_t;
 
   ///////////////////////////////////////
   // Internal design logic to register //
   ///////////////////////////////////////
   typedef struct packed {
-    ddr_ctrl_hw2reg_init_calib_complete_reg_t init_calib_complete; // [69:68]
-    ddr_ctrl_hw2reg_ddrs_miso_u_reg_t ddrs_miso_u; // [67:35]
-    ddr_ctrl_hw2reg_ddrs_miso_l_reg_t ddrs_miso_l; // [34:2]
-    ddr_ctrl_hw2reg_ddrs_miso_valid_reg_t ddrs_miso_valid; // [1:0]
+    ddr_ctrl_hw2reg_init_calib_complete_reg_t init_calib_complete; // [103:102]
+    ddr_ctrl_hw2reg_ddrs_miso_u_reg_t ddrs_miso_u; // [101:69]
+    ddr_ctrl_hw2reg_ddrs_miso_l_reg_t ddrs_miso_l; // [68:36]
+    ddr_ctrl_hw2reg_ddrs_miso_valid_reg_t ddrs_miso_valid; // [35:34]
+    ddr_ctrl_hw2reg_rxf_ctrl_reg_t rxf_ctrl; // [33:0]
   } ddr_ctrl_hw2reg_t;
 
   // Register Address
-  parameter logic [4:0] DDR_CTRL_INIT_CALIB_COMPLETE_OFFSET = 5'h 0;
-  parameter logic [4:0] DDR_CTRL_DDRS_MOSI_U_OFFSET = 5'h 4;
-  parameter logic [4:0] DDR_CTRL_DDRS_MOSI_L_OFFSET = 5'h 8;
-  parameter logic [4:0] DDR_CTRL_DDRS_MOSI_VALID_OFFSET = 5'h c;
-  parameter logic [4:0] DDR_CTRL_DDRS_MISO_U_OFFSET = 5'h 10;
-  parameter logic [4:0] DDR_CTRL_DDRS_MISO_L_OFFSET = 5'h 14;
-  parameter logic [4:0] DDR_CTRL_DDRS_MISO_VALID_OFFSET = 5'h 18;
+  parameter logic [15:0] DDR_CTRL_INIT_CALIB_COMPLETE_OFFSET = 16'h 0;
+  parameter logic [15:0] DDR_CTRL_DDRS_MOSI_U_OFFSET = 16'h 4;
+  parameter logic [15:0] DDR_CTRL_DDRS_MOSI_L_OFFSET = 16'h 8;
+  parameter logic [15:0] DDR_CTRL_DDRS_MOSI_VALID_OFFSET = 16'h c;
+  parameter logic [15:0] DDR_CTRL_DDRS_MISO_U_OFFSET = 16'h 10;
+  parameter logic [15:0] DDR_CTRL_DDRS_MISO_L_OFFSET = 16'h 14;
+  parameter logic [15:0] DDR_CTRL_DDRS_MISO_VALID_OFFSET = 16'h 18;
+  parameter logic [15:0] DDR_CTRL_RXF_CTRL_OFFSET = 16'h 1c;
+  parameter logic [15:0] DDR_CTRL_CPU_RD_OFFSET = 16'h 20;
 
+  // Window parameter
+  parameter logic [15:0] DDR_CTRL_DMEM_OFFSET = 16'h 8000;
+  parameter logic [15:0] DDR_CTRL_DMEM_SIZE   = 16'h 1000;
 
   // Register Index
   typedef enum int {
@@ -81,18 +103,22 @@ package ddr_ctrl_reg_pkg;
     DDR_CTRL_DDRS_MOSI_VALID,
     DDR_CTRL_DDRS_MISO_U,
     DDR_CTRL_DDRS_MISO_L,
-    DDR_CTRL_DDRS_MISO_VALID
+    DDR_CTRL_DDRS_MISO_VALID,
+    DDR_CTRL_RXF_CTRL,
+    DDR_CTRL_CPU_RD
   } ddr_ctrl_id_e;
 
   // Register width information to check illegal writes
-  parameter logic [3:0] DDR_CTRL_PERMIT [7] = '{
+  parameter logic [3:0] DDR_CTRL_PERMIT [9] = '{
     4'b 0001, // index[0] DDR_CTRL_INIT_CALIB_COMPLETE
     4'b 1111, // index[1] DDR_CTRL_DDRS_MOSI_U
     4'b 1111, // index[2] DDR_CTRL_DDRS_MOSI_L
     4'b 0001, // index[3] DDR_CTRL_DDRS_MOSI_VALID
     4'b 1111, // index[4] DDR_CTRL_DDRS_MISO_U
     4'b 1111, // index[5] DDR_CTRL_DDRS_MISO_L
-    4'b 0001  // index[6] DDR_CTRL_DDRS_MISO_VALID
+    4'b 0001, // index[6] DDR_CTRL_DDRS_MISO_VALID
+    4'b 1111, // index[7] DDR_CTRL_RXF_CTRL
+    4'b 0001  // index[8] DDR_CTRL_CPU_RD
   };
 endpackage
 
