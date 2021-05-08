@@ -279,7 +279,7 @@ package top_earlgrey_pkg;
   /**
    * Peripheral size in bytes for dla in top earlgrey.
    */
-  parameter int unsigned TOP_EARLGREY_DLA_SIZE_BYTES = 32'h2000;
+  parameter int unsigned TOP_EARLGREY_DLA_SIZE_BYTES = 32'h10000;
 
   /**
    * Memory base address for rom in top earlgrey.

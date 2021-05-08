@@ -66,8 +66,9 @@ set axi_chip2chip_host [create_ip -name axi_chip2chip -vendor xilinx.com -librar
 set_property -dict { 
   CONFIG.C_AXI_WUSER_WIDTH {0}
   CONFIG.C_AXI_ID_WIDTH {8}
-  CONFIG.C_SELECTIO_PHY_CLK {200}
-  CONFIG.C_NUM_OF_IO {22}
+  CONFIG.C_NUM_OF_IO {64}
+  CONFIG.C_INTERFACE_MODE {0}
+  CONFIG.C_USE_DIFF_CLK {true}
 } [get_ips axi_chip2chip_host]
 
 set_property -dict { 

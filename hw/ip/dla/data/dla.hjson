@@ -539,7 +539,7 @@
         { bits: "19:18",
           name: "bias",
           desc: '''
-            	2'd1, bias enable; 2'd2, BN enable.
+                2'd1, bias enable; 2'd2, BN enable.
           '''
         }
         { bits: "20",
@@ -551,7 +551,7 @@
         { bits: "22:21",
           name: "oper",
           desc: '''
-            	2'd0, bypass;
+                2'd0, bypass;
               2'd1, mul only;
               2'd2, add only;
               2'd3, mul and add enable.
@@ -1062,20 +1062,92 @@
         }
       ]
     }
-    /*
-    { name: "SOC2GB_WDATA",
-      desc: "Write data",
+
+
+    //DDR CTRL registers
+    { name: "INIT_CALIB_COMPLETE"
+      desc: "init_calib_complete",
+      swaccess: "ro",
+      hwaccess: "hwo",
+      fields: [
+        { bits: "0"}
+      ]
+    }
+    
+    { name: "DDR_MOSI_U",
+      desc: "ddr_mosi 63:32",
       swaccess: "wo",
       hwaccess: "hro",
-      hwqe: "true",
       fields: [
         { bits: "31:0" }
       ]
-      tags: [// don't write to wdata - it affects several other csrs
-             "excl:CsrNonInitTests:CsrExclWrite"]
     }
-    */
-    
+    { name: "DDR_MOSI_L",
+      desc: "ddr_mosi 31:0",
+      swaccess: "wo",
+      hwaccess: "hro",
+      fields: [
+        { bits: "31:0" }
+      ]
+    }
+    { name: "DDR_MOSI_VALID"
+      desc: "ddr_mosi_valid",
+      swaccess: "r0w1c",
+      hwaccess: "hro",
+      hwqe:  "true",
+      fields: [
+        { bits: "0"
+          //name: "start"
+        }
+      ]
+    }
+    { name: "DDR_MISO_VALID"
+      desc: "ddr_miso_valid",
+      swaccess: "rw",
+      hwaccess: "hwo",
+      fields: [
+        { bits: "0"
+          //name: "start"
+        }
+      ]
+    }
+    { name: "RXF_CTRL",
+      desc: "ddr data receive fifo ctrl",
+      swaccess: "rw",
+      hwaccess: "hwo",
+      fields: [
+        { bits: "31:16"
+          name: "rptr",
+          desc: "software read pointer"
+        }
+        { bits: "15:0"
+          name: "wptr",
+          desc: "hardware write pointer"
+        }
+      ]
+    }
+    { name: "CPU_RD"
+      desc: "cpu_rd",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "0"
+          //name: "start"
+        }
+      ]
+    }
+
+    { name: "CPU_ACCESS_DDR"
+      desc: "cpu_access_ddr",
+      swaccess: "rw",
+      hwaccess: "hro",
+      fields: [
+        { bits: "0"
+        }
+      ]
+    }
+
+    { skipto: "0x8000" }
     // Dmem size (given as `items` below) must be a power of two.
     { window: {
         name: "DMEM"
@@ -1085,11 +1157,11 @@
         desc: '''
           Data Memory.
 
-          This register should only be accesed while DLA is not busy,
-          as indicated by the !GST_STATUS.ddr2gb flag.
-          Accesses while DLA is busy are blocking.
+          Stores ddr_miso, controlled by ddr_ctrl_rxf_ctrl
+          if cpu_rd register is 0, cpu has read/write control to dmem
+          if cpu_rd register is 1, ddr_ctrl_rxf_ctrl has read/write control to dmem
           '''
-      }
+        }
     }
     
   ]

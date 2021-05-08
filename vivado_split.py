@@ -14,6 +14,8 @@ else:
 
 if (runs[0]):
     #file 1, dla.sv
+    #this file can be changed directly in 'hw/ip/dla/rtl/dla.sv'
+    '''
     read_path = r'hw/ip/dla/rtl/dla.sv'
     write_path = r'/home/junmin/genesys2/opentitan-dla-fmc/opentitan-dla-fmc.srcs/sources_1/imports/rtl/dla.sv'
     os.rename(write_path, write_path+".orig")
@@ -103,6 +105,7 @@ if (runs[0]):
         dla.insert(39, s)
 
         writer.writelines(dla)
+    '''
 
 if (runs[1]):
     #file 2, top_earlgrey_nexysvideo.sv

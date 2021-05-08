@@ -181,6 +181,12 @@ dif_dla_result_t dif_dla_ppe_comp(const dif_dla_t *dla, uint32_t elem, uint32_t 
 dif_dla_result_t dif_dla_read_ddr(const dif_dla_t *dla,
                                   uint32_t offset_bytes, void *dest, size_t len_bytes );
 
+//ddr ctrl
+dif_dla_result_t dif_dla_ddr_ctrl_init_calib(const dif_dla_t *dla);
+dif_dla_result_t dif_dla_ddr_ctrl_write_buf(const dif_dla_t *dla, uint32_t ddr_start_addr, void *src, size_t len_bytes);
+dif_dla_result_t dif_dla_ddr_ctrl_read(const dif_dla_t *dla, uint32_t ddr_start_addr, void *dest, size_t len_bytes, uint32_t* wptr);
+dif_dla_result_t dif_dla_ddr_ctrl_wptr(const dif_dla_t *dla, uint32_t* wptr);
+
 
 /**
  * Configures DLA with runtime information.

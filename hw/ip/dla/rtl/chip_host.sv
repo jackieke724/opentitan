@@ -7,10 +7,15 @@ module chip_host(
 
   input idelay_ref_clk,
   input wire axi_c2c_phy_clk,
-  output wire axi_c2c_selio_tx_clk_out,
-  output wire [9 : 0] axi_c2c_selio_tx_data_out,
-  input wire axi_c2c_selio_rx_clk_in,
-  input wire [9 : 0] axi_c2c_selio_rx_data_in
+  output wire axi_c2c_selio_tx_diff_clk_out_p,
+  output wire axi_c2c_selio_tx_diff_clk_out_n,
+  output wire [30 : 0] axi_c2c_selio_tx_data_out,
+  input wire axi_c2c_selio_rx_diff_clk_in_p,
+  input wire axi_c2c_selio_rx_diff_clk_in_n,
+  input wire [30 : 0] axi_c2c_selio_rx_data_in,
+  output wire axi_c2c_link_status_out,
+  output wire axi_c2c_multi_bit_error_out,
+  output wire axi_c2c_link_error_out
 );
 
 logic   [7:0]               s_axi_awid;
@@ -45,9 +50,6 @@ logic                       s_axi_rready;
 
 wire [3 : 0] axi_c2c_m2s_intr_in;
 wire [3 : 0] axi_c2c_s2m_intr_out;
-wire axi_c2c_link_status_out;
-wire axi_c2c_multi_bit_error_out;
-wire axi_c2c_link_error_out;
 
 assign axi_c2c_m2s_intr_in = 4'b0;
 
@@ -87,10 +89,12 @@ axi_chip2chip_host axi_chip2chip_host_inst (
   .axi_c2c_s2m_intr_out(axi_c2c_s2m_intr_out),                // output wire [3 : 0] axi_c2c_s2m_intr_out
   .idelay_ref_clk(idelay_ref_clk),                            // input wire idelay_ref_clk
   .axi_c2c_phy_clk(axi_c2c_phy_clk),                          // input wire axi_c2c_phy_clk
-  .axi_c2c_selio_tx_clk_out(axi_c2c_selio_tx_clk_out),        // output wire axi_c2c_selio_tx_clk_out
-  .axi_c2c_selio_tx_data_out(axi_c2c_selio_tx_data_out),      // output wire [9 : 0] axi_c2c_selio_tx_data_out
-  .axi_c2c_selio_rx_clk_in(axi_c2c_selio_rx_clk_in),          // input wire axi_c2c_selio_rx_clk_in
-  .axi_c2c_selio_rx_data_in(axi_c2c_selio_rx_data_in),        // input wire [9 : 0] axi_c2c_selio_rx_data_in
+  .axi_c2c_selio_tx_data_out(axi_c2c_selio_tx_data_out),      // output wire [30 : 0] axi_c2c_selio_tx_data_out
+  .axi_c2c_selio_rx_data_in(axi_c2c_selio_rx_data_in),        // input wire [30 : 0] axi_c2c_selio_rx_data_in
+  .axi_c2c_selio_tx_diff_clk_out_p(axi_c2c_selio_tx_diff_clk_out_p),  // output wire axi_c2c_selio_tx_diff_clk_out_p
+  .axi_c2c_selio_tx_diff_clk_out_n(axi_c2c_selio_tx_diff_clk_out_n),  // output wire axi_c2c_selio_tx_diff_clk_out_n
+  .axi_c2c_selio_rx_diff_clk_in_p(axi_c2c_selio_rx_diff_clk_in_p),    // input wire axi_c2c_selio_rx_diff_clk_in_p
+  .axi_c2c_selio_rx_diff_clk_in_n(axi_c2c_selio_rx_diff_clk_in_n),    // input wire axi_c2c_selio_rx_diff_clk_in_n
   .axi_c2c_link_status_out(axi_c2c_link_status_out),          // output wire axi_c2c_link_status_out
   .axi_c2c_multi_bit_error_out(axi_c2c_multi_bit_error_out),  // output wire axi_c2c_multi_bit_error_out
   .axi_c2c_link_error_out(axi_c2c_link_error_out)            // output wire axi_c2c_link_error_out

@@ -62,6 +62,11 @@ filesets:
       - rtl/dla_sbuf.v
       - rtl/dla_wbuf_mng.v
       - rtl/dla_wbuf.v
+      - rtl/ddr_ctrl/ddr_ctrl_pkg.sv
+      - rtl/ddr_ctrl/ddrif.v
+      - rtl/ddr_ctrl/ddrif_dla.v
+      - rtl/ddr_ctrl/ddrif_ui.v
+      - rtl/ddr_ctrl/ddr_ctrl_rxf_ctrl.sv
       - rtl/ddr_ram_interface.sv
       - rtl/dla.sv
     file_type: systemVerilogSource
