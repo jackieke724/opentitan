@@ -113,3 +113,16 @@ sw_lib_usb = declare_dependency(
     ]
   )
 )
+
+# DDR library (sw_lib_ddr_spi)
+sw_lib_ddr_spi = declare_dependency(
+  link_with: static_library(
+    'ddr_ot',
+    sources: [
+      'ddr_spi.c',
+    ],
+    dependencies: [
+      top_earlgrey,
+    ]
+  )
+)

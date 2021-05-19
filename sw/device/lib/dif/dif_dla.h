@@ -188,6 +188,33 @@ dif_dla_result_t dif_dla_ddr_ctrl_read(const dif_dla_t *dla, uint32_t ddr_start_
 dif_dla_result_t dif_dla_ddr_ctrl_wptr(const dif_dla_t *dla, uint32_t* wptr);
 
 
+// following is adapted from dla_src.cpp for microblaze
+dif_dla_result_t dif_dla_pbuf_rst(const dif_dla_t *dla, uint32_t len);
+dif_dla_result_t dif_dla_move_ddr2gb(const dif_dla_t *dla, uint32_t len, uint64_t ddr_addr,
+                    uint32_t gb_addr, uint32_t gb_idx, uint32_t gb_mux, uint32_t direction);
+dif_dla_result_t dif_dla_move_fbuf2lbuf(const dif_dla_t *dla, uint32_t src_addr, uint32_t dest_addr,
+                    uint32_t skip, uint32_t iter, uint32_t len, uint32_t dila, uint32_t mode);
+dif_dla_result_t dif_dla_fc_comp(const dif_dla_t *dla, 
+                uint32_t mode_spar, uint32_t k_scale,
+                uint32_t if_chl, uint32_t of_chl, 
+                uint32_t sub_col, uint32_t sub_row,
+                uint32_t lbuf_addr, uint32_t wbuf_addr, uint32_t ibuf_addr,
+                uint32_t row_num, uint32_t acc_len );
+dif_dla_result_t dif_dla_conv_comp(const dif_dla_t *dla, 
+                uint32_t mode_spar, uint32_t k_size, uint32_t k_scale,
+                uint32_t if_len, uint32_t of_len, uint32_t if_chl, uint32_t of_chl, 
+                uint32_t pad_left, uint32_t pad_right, uint32_t pad_num, uint32_t sub_col,
+                uint32_t sub_row, uint32_t lbuf_addr, uint32_t wbuf_addr, uint32_t ibuf_addr,
+                uint32_t row_num, uint32_t acc_len);
+dif_dla_result_t dif_dla_ppe_comp_full(const dif_dla_t *dla, 
+                    uint32_t act, uint32_t elem, uint32_t bias, 
+                    uint32_t pass, uint32_t row, uint32_t len, uint32_t iter, uint32_t post,
+                    uint32_t mode, uint32_t oper, uint32_t fbuf_src, uint32_t fbuf_dest,
+                    uint32_t abuf_src, uint32_t src_dila, uint32_t dest_dila, 
+                    uint32_t src_skip, uint32_t dest_skip,
+                    uint32_t *act_k, uint32_t *act_b, uint32_t *act_x );
+
+
 /**
  * Configures DLA with runtime information.
  *

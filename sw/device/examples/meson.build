@@ -18,3 +18,5 @@ sw_examples_demos = declare_dependency(
 
 subdir('hello_usbdev')
 subdir('hello_world')
+subdir('lstm')
+subdir('wavenet')

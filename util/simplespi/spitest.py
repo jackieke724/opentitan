@@ -83,10 +83,10 @@ def main():
     parser.add_argument(
         '-r',
         '--receive',
-        nargs=2,
-        metavar='1024 32',
+        nargs=1,
+        metavar='1024',
         action='store',
-        help='Specify bytes to receive and bytes to trim')
+        help='Specify bytes to receive')
     args = parser.parse_args()
 
     if args.version:
@@ -172,20 +172,22 @@ def main():
                 read_buf = device.exchange(write_buf, duplex=True)
                 
                 if ((not echo_checked) and int(cnt/128)>0):
-                    print(cnt, "Got " + str(read_buf), len(read_buf), read_buf.hex(), read_buf[:4].hex())
+                    # print(cnt, "Got " + str(read_buf), len(read_buf), read_buf.hex(), read_buf[:4].hex())
                     #this echo match is from the last patch
                     if (echo_match_fifo[0] == read_buf[:4]):
                         echo_checked = True
                         echo_match_fifo.pop(0)
                         
                     elif (cnt%128==127):
+                        #if mismatch, try increasing the sleep time below
+                        #through trials, ~0.002 seems to be the minimum
                         print("ERROR: echo mismatch!")
                         return
                     else:
                         #need to wait long enough so that 
                         #the time to send the next whole patch is greater than
                         #the time for SPI slave to write the previous patch to DDR
-                        time.sleep(0.1) 
+                        time.sleep(0.002) 
 
                 if (cnt%128==127): echo_checked = False
 
@@ -196,7 +198,7 @@ def main():
                     #echo_match_swp will need to flipped endianness
                     echo_match_swp = bytes(a ^ b for (a, b) in zip(write_buf[:8], bytes.fromhex("01010101")))
                     echo_match = bytes([c for t in zip(echo_match_swp[3::4], echo_match_swp[2::4], echo_match_swp[1::4], echo_match_swp[::4]) for c in t])
-                    print("Patch", int(cnt/128), "s[:8]", s[:8], "echo_match", echo_match.hex())
+                    # print("Patch", int(cnt/128), "s[:8]", s[:8], "echo_match", echo_match.hex())
                     echo_match_fifo.append(echo_match)
                     
                 cnt+=1
@@ -204,12 +206,10 @@ def main():
         return
 
     if args.receive:
-        print(int(args.receive[0])+int(args.receive[1]), "bytes will be written to receive.txt")
+        print(int(args.receive[0]), "bytes will be written to receive.txt")
         with open("receive.txt", 'w') as fp:
             '''
             The code below reads data from SPI and writes to receive.txt
-            It trims "extra data" from receive.txt and writes to receive_trim.txt
-            For details of "extra data", see comments below
 
             Every SPI exchange (simultaneous read and write) is 8 bytes
             but we will actually send empty data (b"") to SPI
@@ -224,10 +224,10 @@ def main():
             We cannot automate this because only host can initiate an exchange
             There is no ready signal coming from device to let the host know
             '''
-            bytes_left = int(args.receive[0])+int(args.receive[1])
+            bytes_left = int(args.receive[0])
             while (bytes_left > 0):
                 bytes_read = min(bytes_left, 1024)
-                print("read", bytes_read, "bytes")
+                #print("read", bytes_read, "bytes")
                 for i in range(int(bytes_read/8)):
                     #read 8 bytes
                     read_buf = device.exchange(b"", 8, duplex=True)
@@ -244,40 +244,13 @@ def main():
                 #needs to wait long enough so that the device (Opentitan) 
                 #has prepared the data to send
                 #need to wait >1 when we print out many lines in UART
-                #i.e. "diff weight_512.txt receive_trim.txt" to check
+                #there is no automatic echo check similar to "send"
+                #need to compare output to expected manually
+                #i.e. "diff weight_512.txt receive.txt" to check
                 #i.e. print out ddr data in UART and manually check the receive.txt
-                time.sleep(2) 
-        
-        print(args.receive[0], "bytes will be written to receive_trim.txt")
-        with open("receive.txt", 'r') as reader, open("receive_trim.txt", 'w') as writer:
-            '''
-            Need to trim the received data
-            The hardware writes all the ddr_miso data into dmem
-            Ibex then reads all data from dmem and sends to SPI
-
-            All dmem data include: (in this order)
-            1. ddr write ack data 
-                they are response signals when we send ddr_mosi requests
-                hardware writes them to dmem by default
-            2. defined data that are previosuly stored in ddr
-            3. random data not initialized in ddr
-
-            Therefore, we might want to trim ddr write ack data (1)
-            and extra data (3)
-            '''
-
-            #assuming we write to ddr in patches of 1024 bytes
-            #then we have <trim_head> lines of "0000000000000001"
-            trim_head = int(int(args.receive[0])/1024)
-
-            #each line has 8 bytes
-            trim_tail = int(int(args.receive[0])/8 + trim_head)
-
-            raw = reader.readlines()
-            writer.writelines(raw[trim_head:trim_tail-1])
-            #avoid writing newline at the last line
-            writer.writelines(raw[trim_tail-1].rstrip())
-
+                #if mismatch, try increasing the sleep time below
+                #through trials, ~0.002 seems to be the minimum
+                time.sleep(0.002) 
         return
 
     print("Select SPI")
