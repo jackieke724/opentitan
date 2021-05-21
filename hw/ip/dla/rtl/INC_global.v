@@ -2,6 +2,6 @@
 
 `ifdef SIMULATION
 
-    `define DUMMY_DDR
+    //`define DUMMY_DDR
 
 `endif

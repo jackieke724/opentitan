@@ -58,3 +58,8 @@ sw/device/tock/tock/Cargo.toml
 
 # ROM_EXT signer vendored in dependencies
 sw/host/rom_ext_image_signer/vendored_dependencies
+
+hw/ip/dla/rtl/dla_core/
+hw/ip/dla/rtl/ddr_ctrl/ddrif.v
+hw/ip/dla/rtl/ddr_ctrl/ddrif_dla.v
+hw/ip/dla/rtl/ddr_ctrl/ddrif_ui.v
