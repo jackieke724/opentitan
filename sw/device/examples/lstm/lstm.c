@@ -20,7 +20,7 @@
 #include "hw/top_earlgrey/sw/autogen/top_earlgrey.h"  // Generated.
 
 static const uint32_t kHart = (uint32_t)kTopEarlgreyPlicTargetIbex0;
-static const uint32_t kComparator = 0;
+// static const uint32_t kComparator = 0;
 
 static dif_gpio_t gpio;
 static dif_spi_device_t spi;
@@ -50,6 +50,10 @@ const uint32_t RD_DDR_BYTES = 65536; //bytes
 
 
 void lstm(void){
+  // uint64_t current_time;
+  // uint64_t kDeadline =
+  //     (kDeviceType == kDeviceSimDV) ? 100 /* 100 us */ : 30000 /* 30 ms */;
+
   uint32_t act_k_tanh[16] = {0x157e, 0x1bf8, 0x21c4, 0x2825, 0x2dd6, 0x33c6, 0x3878, 0x3b75,
             0x3b75, 0x3878, 0x33c6, 0x2dd6, 0x2825, 0x21c4, 0x1bf8, 0x157e};
   uint32_t act_b_tanh[16] = {0xbbf3, 0xbbe0, 0xbbb0, 0xbb3f, 0xba43, 0xb85e, 0xb2ef, 0xa21e,
@@ -76,8 +80,24 @@ void lstm(void){
   // meu
   LOG_INFO("gpio[0] = 1;");
 
+  // LOG_INFO("DDR2GB");
+  // CHECK(dif_rv_timer_counter_read(&timer, kHart, &current_time) ==
+  //       kDifRvTimerOk);
+  // LOG_INFO("Current time: %d; timer theshold: %d", (uint32_t)current_time,
+  //          (uint32_t)(current_time + kDeadline));
+  // CHECK(dif_rv_timer_counter_set_enabled(&timer, kHart, kDifRvTimerEnabled) ==
+  //       kDifRvTimerOk);
+  
   dif_dla_move_ddr2gb(&dla, 552, 0, 0,   // baseaddr, len, ddr_addr, gb_addr 
         0, 1, 0);            // gb_idx, gb_mux, direction
+  
+  // CHECK(dif_rv_timer_counter_set_enabled(&timer, kHart, kDifRvTimerDisabled) ==
+  //       kDifRvTimerOk);
+  // CHECK(dif_rv_timer_counter_read(&timer, kHart, &current_time) ==
+  //       kDifRvTimerOk);
+  // LOG_INFO("Current time: %d; timer theshold: %d", (uint32_t)current_time,
+  //          (uint32_t)(current_time + kDeadline));
+
   dif_dla_move_ddr2gb(&dla, 552, 552, 0,   // baseaddr, len, ddr_addr, gb_addr 
         1, 1, 0);            // gb_idx, gb_mux, direction
   dif_dla_move_ddr2gb(&dla, 552, 1104, 0,   // baseaddr, len, ddr_addr, gb_addr 
@@ -159,15 +179,54 @@ void lstm(void){
   // Computing lstm_1_xi_gate
   // t:1-2, oc:0-1, ic:0-31, k:0-0
   // T:10, OC:2, IC:32, K:1
+  // LOG_INFO("FBUF2LBUF");
+  // CHECK(dif_rv_timer_counter_read(&timer, kHart, &current_time) ==
+  //       kDifRvTimerOk);
+  // LOG_INFO("Current time: %d; timer theshold: %d", (uint32_t)current_time,
+  //          (uint32_t)(current_time + kDeadline));
+  // CHECK(dif_rv_timer_counter_set_enabled(&timer, kHart, kDifRvTimerEnabled) ==
+  //       kDifRvTimerOk);
+  
   dif_dla_move_fbuf2lbuf(&dla, 0, 0,  // baseaddr, src_addr, dest_addr
            0, 0, 31, 1, 0);     // skip, iter, len, dila, mode
+  
+  // CHECK(dif_rv_timer_counter_set_enabled(&timer, kHart, kDifRvTimerDisabled) ==
+  //       kDifRvTimerOk);
+  // CHECK(dif_rv_timer_counter_read(&timer, kHart, &current_time) ==
+  //       kDifRvTimerOk);
+  // LOG_INFO("Current time: %d; timer theshold: %d", (uint32_t)current_time,
+  //          (uint32_t)(current_time + kDeadline));
+
+  // LOG_INFO("FCCOMP");
+  // CHECK(dif_rv_timer_counter_read(&timer, kHart, &current_time) ==
+  //       kDifRvTimerOk);
+  // LOG_INFO("Current time: %d; timer theshold: %d", (uint32_t)current_time,
+  //          (uint32_t)(current_time + kDeadline));
+  // CHECK(dif_rv_timer_counter_set_enabled(&timer, kHart, kDifRvTimerEnabled) ==
+  //       kDifRvTimerOk);
+
   dif_dla_fc_comp(
     &dla, 0,                   // baseaddr, mode_spar
     14, 32, 2, 1, 2,        // k_scale, if_chl, of_chl, sub_col, sub_row
     0, 0, 0x00, 15, 1     // lbuf_addr, wbuf_addr, ibuf_addr, row_num, acc_len
   );
 
+  // CHECK(dif_rv_timer_counter_set_enabled(&timer, kHart, kDifRvTimerDisabled) ==
+  //       kDifRvTimerOk);
+  // CHECK(dif_rv_timer_counter_read(&timer, kHart, &current_time) ==
+  //       kDifRvTimerOk);
+  // LOG_INFO("Current time: %d; timer theshold: %d", (uint32_t)current_time,
+  //          (uint32_t)(current_time + kDeadline));
+
   // bypass
+  // LOG_INFO("PPE_COMP");
+  // CHECK(dif_rv_timer_counter_read(&timer, kHart, &current_time) ==
+  //       kDifRvTimerOk);
+  // LOG_INFO("Current time: %d; timer theshold: %d", (uint32_t)current_time,
+  //          (uint32_t)(current_time + kDeadline));
+  // CHECK(dif_rv_timer_counter_set_enabled(&timer, kHart, kDifRvTimerEnabled) ==
+  //       kDifRvTimerOk);
+
   dif_dla_ppe_comp_full (
     &dla, 0, 0, 0, 1, 15,  // baseaddr, act, elem, bias, pass, row
     0, 2, 1, 0, 0,               // len, iter, post, mode, oper
@@ -175,6 +234,13 @@ void lstm(void){
     11111, 2, 11111, 1,         // src_dila, dest_dila, src_skip, dest_skip
     act_k_dummy, act_b_dummy, act_x_dummy
   );
+
+  // CHECK(dif_rv_timer_counter_set_enabled(&timer, kHart, kDifRvTimerDisabled) ==
+  //       kDifRvTimerOk);
+  // CHECK(dif_rv_timer_counter_read(&timer, kHart, &current_time) ==
+  //       kDifRvTimerOk);
+  // LOG_INFO("Current time: %d; timer theshold: %d", (uint32_t)current_time,
+  //          (uint32_t)(current_time + kDeadline));
 
   // Computing lstm_1_xf_gate
   // t:1-2, oc:0-1, ic:0-31, k:0-0
@@ -6325,6 +6391,8 @@ void lstm_wrapper(void){
         kDifRvTimerOk);
   lstm();
 
+  CHECK(dif_rv_timer_counter_set_enabled(&timer, kHart, kDifRvTimerDisabled) ==
+        kDifRvTimerOk);
   CHECK(dif_rv_timer_counter_read(&timer, kHart, &current_time) ==
         kDifRvTimerOk);
   LOG_INFO("Current time: %d; timer theshold: %d", (uint32_t)current_time,
